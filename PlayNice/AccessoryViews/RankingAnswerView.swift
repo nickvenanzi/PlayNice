@@ -27,6 +27,9 @@ struct RankingAnswerView: View {
                 Text("\(answer.votes) votes")
                     .font(.caption)
                     .foregroundColor(.gray)
+                    .frame(width: 70)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 
                 PercentageBar(percentage: Double(answer.winPercentage))
                 Text("\(Int(answer.winPercentage*100))%")
@@ -57,7 +60,7 @@ struct PercentageBar: View {
 
 struct RankingAnswerView_Previews: PreviewProvider {
     static var answer: Answer =
-        Answer(answer: "Test Answer 2lsjdfhlaksdjhfalksdjhflajshdflkjahsdfs\n...more text...", prompt: "What is something you might find in President Joe Biden's search history?", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.81, votes: 22, date: AnswerDate(year: 2024, month: 7, day: 21), globalRank: 3)
+        Answer(answer: "Test Answer 2lsjdfhlaksdjhfalksdjhflajshdflkjahsdfs\n...more text...", prompt: "What is something you might find in President Joe Biden's search history?", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.81, votes: 2222222, date: AnswerDate(year: 2024, month: 7, day: 21), globalRank: 3)
     
     static var previews: some View {
         RankingAnswerView(answer)

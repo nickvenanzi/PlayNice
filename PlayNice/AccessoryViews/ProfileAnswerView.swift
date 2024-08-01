@@ -13,42 +13,45 @@ struct ProfileAnswerView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 DateView(answer.date).frame(maxHeight: 50)
-                
-                VStack(alignment: .leading) {
-                    Text(answer.prompt)
-                        .font(.body)
-                        .fontWeight(.bold)
-                    Text(answer.answer)
-                        .font(.body)
-//                        .foregroundColor(.gray)
-                }
+
+                Text(answer.prompt)
+                    .font(.body)
+                    .fontWeight(.bold)
+                    .padding(.leading, 5)
                 if let rank = answer.globalRank {
                     Spacer()
                     RankView(rank)
-                        .frame(alignment: .leading)
+                        .frame(alignment: .trailing)
                 }
             }
+            
+            Text(answer.answer)
+                .font(.body)
+                .padding(.top, 10)
             
             HStack {
                 Text("\(answer.votes) votes")
                     .font(.caption)
                     .foregroundColor(.gray)
+                    .frame(width: 70)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 
                 PercentageBar(percentage: Double(answer.winPercentage))
                 Text("\(Int(answer.winPercentage*100))%")
                     .font(.caption)
                     .foregroundColor(.gray)
-            }
+            }.padding(.top, 10)
         }
     }
 }
 
 struct ProfileAnswerView_Previews: PreviewProvider {
     static var answer: Answer =
-        Answer(answer: "Test Answer 2lsjdfhlaksdjhfalksdjhflajshdflkjahsdfs\n...more text...", prompt: "What is something you might find in President Joe Biden's search history?", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.81, votes: 22, date: AnswerDate(year: 2024, month: 7, day: 21), globalRank: 3)
+        Answer(answer: "Test Answer 2lsjdfhlaksdjhfalksdjhflajshdflkjahsdfs\n...more text...", prompt: "What is something you might find in President Joe Biden's search history?", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.81, votes: 22222, date: AnswerDate(year: 2024, month: 7, day: 21), globalRank: 3)
     
     static var previews: some View {
-        ProfileAnswerView(answer)
+        ProfileAnswerView(answer).frame(height: 180)
     }
 }
 
