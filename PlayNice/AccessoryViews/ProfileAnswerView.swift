@@ -29,19 +29,8 @@ struct ProfileAnswerView: View {
                 .font(.body)
                 .padding(.top, 10)
             
-            HStack {
-                Text("\(answer.votes) votes")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .frame(width: 70)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                
-                PercentageBar(percentage: Double(answer.winPercentage))
-                Text("\(Int(answer.winPercentage*100))%")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }.padding(.top, 10)
+            AnswerPercentageBar(answer)
+                .padding(.top, 10)
         }
     }
 }

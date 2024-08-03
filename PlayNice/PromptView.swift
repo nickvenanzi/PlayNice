@@ -4,11 +4,11 @@ struct PromptView: View {
     @State private var userAnswer: String = ""
     @State private var showAlert: Bool = false
 
-    @State var prompt: String = "What is your favorite programming language?"
+    @EnvironmentObject var prompt: Prompt
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text(prompt)
+            Text(prompt.text)
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top, 20)

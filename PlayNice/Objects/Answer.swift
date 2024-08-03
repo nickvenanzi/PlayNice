@@ -63,11 +63,30 @@ struct Answer: Hashable, Comparable, Codable, Identifiable {
     }
 }
 
-struct AnswerDate: Hashable, Comparable, Codable {
+struct AnswerDate: Hashable, Comparable, Codable, Equatable {
     
     var year: Int = 2024
     var month: Int = 1
     var day: Int = 1
+    
+    /*
+     Default initializer creates an AnswerDate object associated with today's date
+     */
+    init() {
+        let pieces = Date().description.split(separator: " ")[0].split(separator: "-")
+        self.year = Int(String(pieces[0])) ?? 0
+        self.month = Int(String(pieces[1])) ?? 0
+        self.day = Int(String(pieces[2])) ?? 0
+    }
+    
+    /*
+     initializer creates an AnswerDate object associated with year/month/day
+     */
+    init(_ year: Int, _ month: Int, _ day: Int) {
+        self.year = year
+        self.month = month
+        self.day = day
+    }
     
     static func < (lhs: AnswerDate, rhs: AnswerDate) -> Bool {
         // same year
@@ -79,6 +98,36 @@ struct AnswerDate: Hashable, Comparable, Codable {
             return lhs.month < rhs.month
         }
         return lhs.year < rhs.year
+    }
+    
+    static func == (lhs: AnswerDate, rhs: AnswerDate) -> Bool {
+        return lhs.day == rhs.day && lhs.month == rhs.month && lhs.year == rhs.year
+    }
+    
+    static func yesterday() -> AnswerDate {
+        let thirtyOne: Set<Int> = Set([1,3,5,7,8,10,12])
+        let thirty: Set<Int> = Set([4,6,9,11])
+        
+        var yesterday = AnswerDate()
+        yesterday.day -= 1
+        
+        if yesterday.day == 0 {
+            yesterday.month -= 1
+            if yesterday.month == 0 {
+                yesterday.month = 12
+                yesterday.year -= 1
+            }
+            if (thirtyOne.contains(yesterday.month)) {
+                yesterday.day = 31
+            } else if (thirty.contains(yesterday.month)) {
+                yesterday.day = 30
+            } else if (yesterday.year % 4 == 0) {
+                yesterday.day = 29
+            } else {
+                yesterday.day = 28
+            }
+        }
+        return yesterday
     }
     
     func getMonthString() -> String {

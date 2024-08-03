@@ -1,6 +1,6 @@
 import SwiftUI
 
-class User: ObservableObject {
+class User: ObservableObject, Hashable {
     
     var firebaseID: String = ""
     var docID: String = ""
@@ -73,6 +73,14 @@ class User: ObservableObject {
     
     func doesFollow(_ otherDocID: String) -> Bool {
         return following.contains(otherDocID)
+    }
+    
+    static func == (lhs: User, rhs: User) -> Bool {
+        lhs.firebaseID == rhs.firebaseID
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(firebaseID)
     }
 }
 
