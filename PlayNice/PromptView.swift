@@ -4,11 +4,11 @@ struct PromptView: View {
     @State private var userAnswer: String = ""
     @State private var showAlert: Bool = false
 
-    @EnvironmentObject var prompt: Prompt
+    @EnvironmentObject var promptEngine: PromptEngine
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text(prompt.text)
+            Text(promptEngine.prompt.text)
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top, 20)
@@ -47,6 +47,7 @@ struct PromptView: View {
 struct PromptView_Previews: PreviewProvider {
     static var previews: some View {
         PromptView()
+            .environmentObject(PromptEngine.shared)
     }
 }
 

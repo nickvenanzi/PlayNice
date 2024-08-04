@@ -15,24 +15,20 @@ enum Tabs: Equatable, Hashable {
 }
 
 struct ContentView: View {
-    
-    @StateObject var timeEngine = TimeEngine.shared
+
+    @EnvironmentObject var timeEngine: TimeEngine
     
     @State private var selectedIndex: Int = 0
-    @StateObject var user = User()
-    @StateObject var prompt: Prompt = Prompt("What is your favorite programming language?", AnswerDate())
     
     var body: some View {
         TabView(selection: $selectedIndex) {
             PromptView()
-                .environmentObject(prompt)
                 .tabItem {
                     Text("Prompt")
                     Image(systemName: "person.text.rectangle")
                 }
             
             VoteView()
-                .environmentObject(prompt)
                 .tabItem {
                     Text("Vote")
                     Image(systemName: "figure.gymnastics")
@@ -45,7 +41,6 @@ struct ContentView: View {
                 }
             
             ProfileView(isSelf: true)
-                .environmentObject(user)
                 .tabItem {
                     Text("Profile")
                     Image(systemName: "person.text.rectangle")
@@ -56,6 +51,9 @@ struct ContentView: View {
             UITabBar.appearance().backgroundColor = .systemGray4.withAlphaComponent(0.4)
         })
         .onReceive(timeEngine.$today, perform: { newToday in
+            PromptEngine.retrievePrompt { newPrompt in
+                
+            }
             /*
              TO-DO
              1. Update prompt

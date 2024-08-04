@@ -105,11 +105,14 @@ struct AnswerDate: Hashable, Comparable, Codable, Equatable {
     }
     
     static func yesterday() -> AnswerDate {
+        return AnswerDate().dayBefore()
+    }
+    
+    func dayBefore() -> AnswerDate {
         let thirtyOne: Set<Int> = Set([1,3,5,7,8,10,12])
         let thirty: Set<Int> = Set([4,6,9,11])
         
-        var yesterday = AnswerDate()
-        yesterday.day -= 1
+        var yesterday = AnswerDate(year, month, day - 1)
         
         if yesterday.day == 0 {
             yesterday.month -= 1
@@ -128,6 +131,15 @@ struct AnswerDate: Hashable, Comparable, Codable, Equatable {
             }
         }
         return yesterday
+    }
+    
+    static func fromString(_ dateString: String) -> AnswerDate {
+        let pieces = dateString.components(separatedBy: "-")
+        return AnswerDate(Int(pieces[0]) ?? 0, Int(pieces[1]) ?? 0, Int(pieces[2]) ?? 0)
+    }
+    
+    func toString() -> String {
+        return "\(year)-\(month)-\(day)"
     }
     
     func getMonthString() -> String {

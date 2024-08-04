@@ -7,8 +7,9 @@
 
 import Foundation
 import Firebase
+import SwiftUI
 
-class PromptEngine {
+class PromptEngine: ObservableObject {
 
     static var db: Firestore {
         Firestore.firestore()
@@ -16,14 +17,31 @@ class PromptEngine {
     
     static var shared: PromptEngine = PromptEngine()
     
+    @Published var prompt: Prompt
+    
+    init() {
+        if let prompt = UserDefaults.standard.string(forKey: StorageKeys.PROMPT) {
+            let submitted = UserDefaults.standard.bool(forKey: StorageKeys.PROMPT_SUBMITTED)
+            self.prompt = Prompt(text: prompt, submitted: submitted)
+            return
+        }
+        self.prompt = Prompt(text: "", submitted: false)
+        PromptEngine.retrievePrompt { newVal in
+            if let prompt = newVal {
+                self.prompt = Prompt(text: prompt, submitted: false)
+                UserDefaults.standard.set(prompt, forKey: StorageKeys.PROMPT)
+                UserDefaults.standard.set(false, forKey: StorageKeys.PROMPT_SUBMITTED)
+            }
+        }
+    }
+    
     /*
      Public facing method to submit user prompt to database.  Upon completion, handler is called to take app to VoteVC
      */
     static func submitPrompt(_ prompt: String, _ answer: String, _ completionHandler: @escaping () -> ()) {
-
-        let date = getDate()
+        let date = TimeEngine.shared.today.toString()
         let answerKey = "answers."+date
-        let userRef = db.collection("users").document(UserEngine.user.docID)
+        let userRef = db.collection("users").document(UserEngine.shared.user.docID)
         userRef.updateData([
             answerKey: [
                 "answer": answer,
@@ -33,22 +51,14 @@ class PromptEngine {
                 "time": FieldValue.serverTimestamp()
             ]
         ]) { _ in
+            PromptEngine.shared.prompt.submitted = true
+            UserDefaults.standard.set(true, forKey: StorageKeys.PROMPT_SUBMITTED)
             completionHandler()
         }
     }
     
-    static func isNewDay() -> Bool {
-        let today = getDate()
-        let lastDate = UserDefaults.standard.string(forKey: "date")
-        if (today == lastDate) {
-            return false
-        } else {
-            return true
-        }
-    }
-    
     static func retrievePrompt(_ completionHandler: @escaping (String?) -> ()) {
-        let today = getDate()
+        let today = TimeEngine.shared.today.toString()
         self.db.collection("prompts").whereField("date", isEqualTo: today).getDocuments() { (querySnapshot, err) in
             if let _ = err {
                 completionHandler(nil)
@@ -61,46 +71,9 @@ class PromptEngine {
             let prompt = document.data()["prompt"] as! String
             UserDefaults.standard.set(prompt, forKey: StorageKeys.PROMPT)
             UserDefaults.standard.set(false, forKey: StorageKeys.PROMPT_SUBMITTED)
-            UserDefaults.standard.set(today, forKey: StorageKeys.DATE)
+            PromptEngine.shared.prompt = Prompt(text: prompt, submitted: false)
             completionHandler(prompt)
             return
         }
-    }
-    
-    static func getDate() -> String {
-        let pieces = Date().description.split(separator: " ")[0].split(separator: "-")
-        let year = Int(String(pieces[0])) ?? 0
-        let month = Int(String(pieces[1])) ?? 0
-        let day = Int(String(pieces[2])) ?? 0
-        return "\(year)-\(month)-\(day)"
-    }
-    
-    static func getPreviousDate() -> String {
-        let thirtyOne: Set<Int> = Set([1,3,5,7,8,10,12])
-        let thirty: Set<Int> = Set([4,6,9,11])
-        let today = getDate()
-        let pieces: [Int] = today.split(separator: "-").map { str in
-            Int(str) ?? 1
-        }
-        var day = pieces[2] - 1
-        var month = pieces[1]
-        var year = pieces[0]
-        if day == 0 {
-            month -= 1
-            if month == 0 {
-                month = 12
-                year -= 1
-            }
-            if (thirtyOne.contains(month)) {
-                day = 31
-            } else if (thirty.contains(month)) {
-                day = 30
-            } else if (year % 4 == 0) {
-                day = 29
-            } else {
-                day = 28
-            }
-        }
-        return "\(year)-\(month)-\(day)"
     }
 }

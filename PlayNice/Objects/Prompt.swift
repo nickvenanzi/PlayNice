@@ -2,17 +2,12 @@
 //  Prompt.swift
 //  PlayNice
 //
-//  Created by Nick Venanzi on 8/2/24.
+//  Created by Nick Venanzi on 8/3/24.
 //
 
-import Foundation
+import SwiftUI
 
-class Prompt: ObservableObject {
-    @Published var text: String = ""
-    @Published var date: AnswerDate
-    
-    init(_ text: String, _ date: AnswerDate) {
-        self.text = text
-        self.date = date
-    }
+struct Prompt {
+    var text: String
+    var submitted: Bool
 }

@@ -2,15 +2,19 @@ import SwiftUI
 
 struct ProfileView: View {
     
-    @EnvironmentObject var user: User
+    @EnvironmentObject var userEngine: UserEngine
+    var otherUser: User = User()
+    
+    var user: User {
+        return isSelf ? userEngine.user : otherUser
+    }
+
     @State private var answerListControl = 0
 
     var isSelf: Bool
     let DEFAULT_USERNAME: String = "[username]"
     let MAX_LENGTH: Int = 20
-    
-    let recentItems = ["Item 1", "Item 2", "Item 3"]
-    let highestItems = ["Item A", "Item B", "Item C"]
+
     init(isSelf: Bool) {
         self.isSelf = isSelf
     }
@@ -18,7 +22,7 @@ struct ProfileView: View {
     var body: some View {
         VStack(spacing: 5) {
             if self.isSelf {
-                TextField(user.nickname == "" ? DEFAULT_USERNAME : user.nickname, text: $user.nickname)
+                TextField(user.nickname == "" ? DEFAULT_USERNAME : user.nickname, text: $userEngine.user.nickname)
                     .font(.largeTitle)
                     .textFieldStyle(.plain)
                     .frame(maxWidth: .infinity)

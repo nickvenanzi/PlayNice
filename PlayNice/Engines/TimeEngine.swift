@@ -13,17 +13,22 @@ class TimeEngine: ObservableObject {
     private var timer: AnyCancellable?
     
     @Published var today: AnswerDate = AnswerDate()
-    @Published var yesterday: AnswerDate = AnswerDate.yesterday()
     
     static var shared: TimeEngine = TimeEngine()
         
     init() {
+        let lastDate = UserDefaults.standard.string(forKey: StorageKeys.DATE)
+        if let todayStr = lastDate {
+            today = AnswerDate.fromString(todayStr)
+        } else {
+            today = AnswerDate()
+        }
         timer = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 if AnswerDate() != self?.today {
-                    self?.yesterday = AnswerDate.yesterday()
                     self?.today = AnswerDate()
+                    UserDefaults.standard.set(self?.today.toString(), forKey: StorageKeys.DATE)
                 }
             }
     }
