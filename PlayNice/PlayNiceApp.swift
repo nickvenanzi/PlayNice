@@ -7,19 +7,19 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseAuth
-
-class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-    return true
-  }
-}
+//
+//class AppDelegate: NSObject, UIApplicationDelegate {
+//  func application(_ application: UIApplication,
+//                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+//    FirebaseApp.configure()
+//    return true
+//  }
+//}
 
 @main
 struct PlayNiceApp: App {
     
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+//    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     @StateObject var timeEngine: TimeEngine = TimeEngine.shared
     @StateObject var promptEngine: PromptEngine = PromptEngine.shared
@@ -27,6 +27,7 @@ struct PlayNiceApp: App {
 //    @StateObject var answerEngine: AnswerEngine = AnswerEngine.shared
 
     init() {
+        FirebaseApp.configure()
         Auth.auth().signInAnonymously { (authResult, error) in
             if let error = error {
                 print("Error signing in anonymously: \(error.localizedDescription)")
