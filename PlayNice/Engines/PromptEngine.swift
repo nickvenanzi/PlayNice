@@ -26,13 +26,7 @@ class PromptEngine: ObservableObject {
             return
         }
         self.prompt = Prompt(text: "", submitted: false)
-        PromptEngine.retrievePrompt { newVal in
-            if let prompt = newVal {
-                self.prompt = Prompt(text: prompt, submitted: false)
-                UserDefaults.standard.set(prompt, forKey: StorageKeys.PROMPT)
-                UserDefaults.standard.set(false, forKey: StorageKeys.PROMPT_SUBMITTED)
-            }
-        }
+        PromptEngine.retrievePrompt()
     }
     
     /*
@@ -57,22 +51,19 @@ class PromptEngine: ObservableObject {
         }
     }
     
-    static func retrievePrompt(_ completionHandler: @escaping (String?) -> ()) {
+    static func retrievePrompt() {
         let today = TimeEngine.shared.today.toString()
         self.db.collection("prompts").whereField("date", isEqualTo: today).getDocuments() { (querySnapshot, err) in
             if let _ = err {
-                completionHandler(nil)
                 return
             }
             guard let document = querySnapshot!.documents.first else {
-                completionHandler(nil)
                 return
             }
             let prompt = document.data()["prompt"] as! String
             UserDefaults.standard.set(prompt, forKey: StorageKeys.PROMPT)
             UserDefaults.standard.set(false, forKey: StorageKeys.PROMPT_SUBMITTED)
             PromptEngine.shared.prompt = Prompt(text: prompt, submitted: false)
-            completionHandler(prompt)
             return
         }
     }

@@ -51,13 +51,12 @@ struct ContentView: View {
             UITabBar.appearance().backgroundColor = .systemGray4.withAlphaComponent(0.4)
         })
         .onReceive(timeEngine.$today, perform: { newToday in
-            PromptEngine.retrievePrompt { newPrompt in
-                
-            }
+            PromptEngine.retrievePrompt()
+            UserEngine.getUserDocument()
+            UserEngine.updateRankingsAndFollowing()
+            
             /*
              TO-DO
-             1. Update prompt
-             2. Update Rankings
              3. Update User profile
              */
         })

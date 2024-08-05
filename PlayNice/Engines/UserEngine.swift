@@ -17,8 +17,8 @@ class UserEngine: ObservableObject {
         UserEngine()
     }
     
-    @Published var rankings: Set<Answer>?
-    @Published var following: Set<User>?
+    @Published var rankings: Set<Answer> = Set()
+    @Published var following: Set<User> = Set()
     @Published var user: User = User()
     
     /*
@@ -31,20 +31,18 @@ class UserEngine: ObservableObject {
             guard let snapshot = qs else {
                 return
             }
-            guard snapshot.documents.count > 0 else {
+            guard snapshot.documents.count > 0, let document = snapshot.documents.first else {
                 setNewUserDocument()
                 return
             }
-            for document in snapshot.documents {
-                let docData = document.data()
-                shared.user.docID = document.documentID
-                shared.user.nickname = docData["username"] as? String ?? "Unknown User"
-                let following = docData["following"] as? [String] ?? []
-                shared.user.following = Set(following)
-                shared.user.answers = processAnswersFromDoc(docData, document.documentID)
-                shared.user.orderAnswers()
-                break
-            }
+        
+            let docData = document.data()
+            shared.user.docID = document.documentID
+            shared.user.nickname = docData["username"] as? String ?? "Unknown User"
+            let following = docData["following"] as? [String] ?? []
+            shared.user.following = Set(following)
+            shared.user.answers = processAnswersFromDoc(docData, document.documentID)
+            shared.user.orderAnswers()
             return
         }
     }
@@ -92,6 +90,72 @@ class UserEngine: ObservableObject {
         return answerMap
     }
     
+    static func updateRankingsAndFollowing() {
+        shared.rankings = Set()
+        shared.following = Set()
+        
+        let yesterday = TimeEngine.shared.today.dayBefore()
+        
+        UserEngine.retrieveTopAnswers(yesterday, 3)
+        UserEngine.retrieveFollowing()
+    }
+    
+    static private func retrieveTopAnswers(_ date: AnswerDate, _ limit: Int) {
+        let field = "answers." + date.toString() + ".globalRank"
+        let topQuery = self.db.collection("users").order(by: field).limit(to: limit)
+        topQuery.getDocuments() { (qs, error) in
+            guard let snapshot = qs else {
+                return
+            }
+            guard snapshot.documents.count > 0 else {
+                return
+            }
+            for document in snapshot.documents {
+                let answerMap: [AnswerDate: Answer] = processAnswersFromDoc(document.data(), document.documentID)
+                guard let answer = answerMap[date] else {
+                    continue
+                }
+                shared.rankings.insert(answer)
+            }
+            return
+        }
+    }
+
+    static func retrieveFollowing() {
+        let yesterday = TimeEngine.shared.today.dayBefore()
+
+        if shared.user.following.isEmpty {
+            return
+        }
+
+        for friend in shared.user.following {
+            let friendQuery = db.collection("users").document(friend)
+            friendQuery.getDocument { (doc, error) in
+                guard let document = doc, let docData = doc?.data() else {
+                    return
+                }
+                var friend = User()
+                friend.docID = document.documentID
+                friend.nickname = docData["username"] as? String ?? "Unknown User"
+                let friendFollowing = docData["following"] as? [String] ?? []
+                friend.following = Set(friendFollowing)
+                friend.answers = processAnswersFromDoc(docData, document.documentID)
+                friend.orderAnswers()
+
+                shared.following.insert(friend)
+                
+                if let yesterdayAnswer = friend.answers[yesterday] {
+                    shared.rankings.insert(yesterdayAnswer)
+                }
+                return
+            }
+        }
+        if let selfAnswer = UserEngine.shared.user.answers[yesterday] {
+            shared.rankings.insert(selfAnswer)
+        }
+    }
+    
+    
 //    static func searchUsers(_ searchQuery: String, _ completionHandler: @escaping ([User]) -> ()) {
 //        if db == nil {
 //            db = Firestore.firestore()
@@ -129,121 +193,7 @@ class UserEngine: ObservableObject {
 //            return
 //        }
 //    }
-//    
-//    static func updateRankingsAndFollowing(_ completionHandler: @escaping () -> ()) {
-//        if rankings != nil && following != nil {
-//            completionHandler()
-//            return
-//        }
-//        rankings = nil
-//        
-//        let yesterday = PromptEngine.getPreviousDate()
-//        let group = DispatchGroup()
-//        group.enter()
-//        group.enter()
-//        
-//        UserEngine.retrieveTopAnswers(yesterday, 3) {
-//            print("Top answers returned")
-//            group.leave()
-//        }
-//        
-//        UserEngine.retrieveFollowing {
-//            for otherUser in following ?? Set() {
-//                guard let answer = otherUser.answers[yesterday] else {
-//                    continue
-//                }
-//                if rankings == nil {
-//                    rankings = Set()
-//                }
-//                rankings!.insert(answer)
-//            }
-//            // add user's answer from yesterday:
-//            if let selfAnswer = UserEngine.user.answers[yesterday] {
-//                if rankings == nil {
-//                    rankings = Set()
-//                }
-//                rankings!.insert(selfAnswer)
-//            }
-//            group.leave()
-//        }
-//        
-//        group.notify(queue: .main) {
-//            completionHandler()
-//        }
-//        
-//    }
-//    
-//    static private func retrieveTopAnswers(_ date: String, _ limit: Int, _ completionHandler: @escaping () -> ()) {
-//        if db == nil {
-//            db = Firestore.firestore()
-//        }
-//        let field = "answers." + date + ".globalRank"
-//        let topQuery = self.db.collection("users").order(by: field).limit(to: limit)
-//        topQuery.getDocuments() { (qs, error) in
-//            guard let snapshot = qs else {
-//                completionHandler()
-//                return
-//            }
-//            guard snapshot.documents.count > 0 else {
-//                completionHandler()
-//                return
-//            }
-//            for document in snapshot.documents {
-//                let answerMap: [String: Answer] = processAnswersFromDoc(document.data(), document.documentID)
-//                guard let answer = answerMap[date] else {
-//                    continue
-//                }
-//                if rankings == nil {
-//                    rankings = Set()
-//                }
-//                rankings!.insert(answer)
-//            }
-//            completionHandler()
-//            return
-//        }
-//    }
-//    
-//    static func retrieveFollowing(_ completionHandler: @escaping () -> ()) {
-//        if db == nil {
-//            db = Firestore.firestore()
-//        }
-//        if user.following.isEmpty || following != nil {
-//            completionHandler()
-//            return
-//        }
-//        let group = DispatchGroup()
-//        
-//        for _ in user.following {
-//            group.enter()
-//        }
-//        for friend in user.following {
-//            let friendQuery = self.db.collection("users").document(friend)
-//            friendQuery.getDocument { (doc, error) in
-//                guard let document = doc, let docData = doc?.data() else {
-//                    group.leave()
-//                    return
-//                }
-//                var friend = User()
-//                friend.docID = document.documentID
-//                friend.nickname = docData["username"] as? String ?? "Unknown User"
-//                let friendFollowing = docData["following"] as? [String] ?? []
-//                friend.following = Set(friendFollowing)
-//                friend.answers = processAnswersFromDoc(docData, document.documentID)
-//                friend.orderAnswers()
-//                
-//                if following == nil {
-//                    following = Set()
-//                }
-//                following!.insert(friend)
-//                group.leave()
-//                return
-//            }
-//        }
-//        group.notify(queue: .main) {
-//            completionHandler()
-//        }
-//    }
-//    
+//
 //    /*
 //     Reset data on new day
 //     */

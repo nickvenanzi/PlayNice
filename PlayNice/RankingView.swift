@@ -5,17 +5,14 @@ struct RankingView: View {
     @EnvironmentObject var userEngine: UserEngine
     
     var rankings: [Answer] {
-        guard let answerSet = userEngine.rankings else {
-            return []
-        }
-        return answerSet.sorted {
+        return userEngine.rankings.sorted {
             ($0.globalRank ?? Int.max) < ($1.globalRank ?? Int.max)
         }
     }
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(userEngine.rankings?.first?.prompt ?? "")
+            Text(userEngine.rankings.first?.prompt ?? "")
                 .font(.title)
                 .padding()
 
