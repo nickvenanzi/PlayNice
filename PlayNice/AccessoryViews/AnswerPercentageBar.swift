@@ -53,14 +53,3 @@ struct AnswerPercentageBar: View {
         }
     }
 }
-
-struct AnswerPercentageBar_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack {
-            AnswerPercentageBar(Answer(answer: "Test Answer 1------------ ------------ blah blah blah is there a god in this dumb universe?", prompt: "Prompt 1 is the following question for ", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.7, votes: 2000, date: AnswerDate(year: 2024, month: 7, day: 22), globalRank: 111), includeVotes: false, progress: 0.0, color: .yellow)
-            AnswerPercentageBar(Answer(answer: "Test Answer 2\n\n\n\n...more text...", prompt: "Prompt 2", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.81, votes: 22, date: AnswerDate(year: 2024, month: 7, day: 21), globalRank: 3))
-            AnswerPercentageBar(Answer(answer: "Test Answer 1------------ ------------", prompt: "Prompt 1", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.7, votes: 24, date: AnswerDate(year: 2024, month: 7, day: 19), globalRank: 1))
-        }
-        .padding()
-    }
-}

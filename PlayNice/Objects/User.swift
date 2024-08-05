@@ -1,17 +1,17 @@
 import SwiftUI
 
-class User: ObservableObject, Hashable {
+struct User: Hashable, Encodable, Decodable {
     
     var firebaseID: String = ""
     var docID: String = ""
     
-    @Published var nickname: String = ""
-    @Published var following: Set<String> = Set()
-    @Published var answers: [AnswerDate: Answer] = [:]
-    @Published var orderedAnswersByDate: [Answer] = []
-    @Published var orderedAnswersByWinPercentage: [Answer] = []
+    var nickname: String = ""
+    var following: Set<String> = Set()
+    var answers: [AnswerDate: Answer] = [:]
+    var orderedAnswersByDate: [Answer] = []
+    var orderedAnswersByWinPercentage: [Answer] = []
     
-    func orderAnswers() {
+    mutating func orderAnswers() {
         let answerArray = answers.map { (key: AnswerDate, value: Answer) in value }
         orderedAnswersByDate = answerArray.sorted { ans1, ans2 in
             ans1 > ans2

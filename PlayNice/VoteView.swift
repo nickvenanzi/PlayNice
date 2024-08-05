@@ -58,16 +58,3 @@ struct AnswerOptionView: View {
         }
     }
 }
-
-struct VoteView_Previews: PreviewProvider {
-    static var previews: some View {
-        VoteView(
-            answers: [
-                Answer(answer: "Test Answer 1------------ ------------", prompt: "Prompt 1", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.99, votes: 102401, date: AnswerDate(2024, 7, 22), globalRank: 1),
-                Answer(answer: "Test Answer 2\n\n\n...more text...", prompt: "Prompt 2", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.81, votes: 22, date: AnswerDate(2024, 7, 21), globalRank: 2),
-                Answer(answer: "Test Answer 3 abcdef ghi\n...more text...", prompt: "Prompt 3", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.05, votes: 22, date: AnswerDate(2024, 7, 20), globalRank: 3),
-                Answer(answer: "Test Answer 1------------ ------------", prompt: "Prompt 1", author: "nick v", authorDocID: "xyzabc", winPercentage: 0.7, votes: 24, date: AnswerDate(2024, 7, 19), globalRank: 89)
-            ]
-        ).environmentObject(PromptEngine.shared)
-    }
-}

@@ -21,6 +21,10 @@ class UserEngine: ObservableObject {
     @Published var following: Set<User> = Set()
     @Published var user: User = User()
     
+    init() {
+        UserEngine.retrieveFromCache()
+    }
+    
     /*
      Retrieves "users" document associated with the current user
      */
@@ -117,6 +121,7 @@ class UserEngine: ObservableObject {
                 }
                 shared.rankings.insert(answer)
             }
+            UserEngine.storeInCache()
             return
         }
     }
@@ -128,6 +133,10 @@ class UserEngine: ObservableObject {
             return
         }
 
+        if let selfAnswer = UserEngine.shared.user.answers[yesterday] {
+            shared.rankings.insert(selfAnswer)
+        }
+        
         for friend in shared.user.following {
             let friendQuery = db.collection("users").document(friend)
             friendQuery.getDocument { (doc, error) in
@@ -147,14 +156,60 @@ class UserEngine: ObservableObject {
                 if let yesterdayAnswer = friend.answers[yesterday] {
                     shared.rankings.insert(yesterdayAnswer)
                 }
-                return
+                UserEngine.storeInCache()
             }
         }
-        if let selfAnswer = UserEngine.shared.user.answers[yesterday] {
-            shared.rankings.insert(selfAnswer)
+    }
+
+    static func storeInCache() {
+        let ranksArray: [Answer] = Array(shared.rankings)
+        let followingArray: [User] = Array(shared.following)
+        let encoder = JSONEncoder()
+
+        let ranksData: [Data] = ranksArray.map { answer in
+            if let encoded = try? encoder.encode(answer) {
+                return encoded
+            } else {
+                return Data()
+            }
+        }
+        let followingData: [Data] = followingArray.map { friend in
+            if let encoded = try? encoder.encode(friend) {
+                return encoded
+            } else {
+                return Data()
+            }
+        }
+        UserDefaults.standard.set(ranksData, forKey: StorageKeys.RANKINGS)
+        UserDefaults.standard.set(followingData, forKey: StorageKeys.FOLLOWING)
+    }
+
+    static func retrieveFromCache() {
+        let decoder = JSONDecoder()
+
+        if let ranksData = UserDefaults.standard.object(forKey: StorageKeys.RANKINGS) as? [Data] {
+            shared.rankings = Set()
+            for data in ranksData {
+                if let answer = try? decoder.decode(Answer.self, from: data) {
+                    shared.rankings.insert(answer)
+                }
+            }
+        }
+        if let followingData = UserDefaults.standard.object(forKey: StorageKeys.FOLLOWING) as? [Data] {
+            shared.following = Set()
+            for data in followingData {
+                if let friend = try? decoder.decode(User.self, from: data) {
+                    shared.following.insert(friend)
+                }
+            }
         }
     }
     
+    static func updateNickname() {
+        db.collection("users").document(shared.user.docID).updateData([
+            "username": shared.user.nickname
+        ]) { _ in }
+    }
     
 //    static func searchUsers(_ searchQuery: String, _ completionHandler: @escaping ([User]) -> ()) {
 //        if db == nil {
@@ -192,74 +247,6 @@ class UserEngine: ObservableObject {
 //            completionHandler(results)
 //            return
 //        }
-//    }
-//
-//    /*
-//     Reset data on new day
-//     */
-//    static func reset() {
-//        following = nil
-//        rankings = nil
-//        UserDefaults.standard.set(nil, forKey: "rankings")
-//        UserDefaults.standard.set(nil, forKey: "following")
-//    }
-//    
-//    static func storeInCache() {
-//        let ranksArray: [Answer] = Array(rankings ?? Set())
-//        let followingArray: [User] = Array(following ?? Set())
-//        let encoder = JSONEncoder()
-//
-//        let ranksData: [Data] = ranksArray.map { answer in
-//            if let encoded = try? encoder.encode(answer) {
-//                return encoded
-//            } else {
-//                print("Error encoding answer")
-//                return Data()
-//            }
-//        }
-//        let followingData: [Data] = followingArray.map { friend in
-//            if let encoded = try? encoder.encode(friend) {
-//                return encoded
-//            } else {
-//                print("Error encoding Friend")
-//                return Data()
-//            }
-//        }
-//        UserDefaults.standard.set(ranksData, forKey: "rankings")
-//        UserDefaults.standard.set(followingData, forKey: "following")
-//    }
-//    
-//    static func retrieveFromCache(_ completionHandler: @escaping () -> ()) {
-//        let decoder = JSONDecoder()
-//        
-//        if let ranksData = UserDefaults.standard.object(forKey: "rankings") as? [Data] {
-//            rankings = Set()
-//            for data in ranksData {
-//                if let answer = try? decoder.decode(Answer.self, from: data) {
-//                    rankings!.insert(answer)
-//                } else {
-//                    print("Error decoding answer")
-//                }
-//            }
-//        }
-//        if let followingData = UserDefaults.standard.object(forKey: "following") as? [Data] {
-//            following = Set()
-//            for data in followingData {
-//                if let friend = try? decoder.decode(User.self, from: data) {
-//                    following!.insert(friend)
-//                } else {
-//                    print("Error decoding friend")
-//                }
-//            }
-//        }
-//        completionHandler()
-//    }
-    
-//    static func updateNickname(_ nickname: String) {
-//        // To update age and favorite color:
-//        db.collection("users").document(user.docID).updateData([
-//            "username": nickname
-//        ]) { _ in }
 //    }
 //    
 //    static func followUser(_ otherUser: User) {

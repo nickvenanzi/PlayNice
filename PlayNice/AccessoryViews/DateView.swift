@@ -62,10 +62,3 @@ struct DateView: View {
         .aspectRatio(1, contentMode: .fit)
     }
 }
-
-
-struct MonthDayView_Previews: PreviewProvider {
-    static var previews: some View {
-        DateView(AnswerDate(year: 2024, month: 7, day: 2))
-    }
-}

@@ -9,4 +9,6 @@ struct StorageKeys {
     static let PROMPT = "prompt"
     static let PROMPT_SUBMITTED = "promptSubmitted"
     static let DATE = "date"
+    static let RANKINGS = "rankings"
+    static let FOLLOWING = "following"
 }

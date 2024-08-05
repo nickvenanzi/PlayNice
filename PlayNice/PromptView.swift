@@ -43,11 +43,3 @@ struct PromptView: View {
         .padding()
     }
 }
-
-struct PromptView_Previews: PreviewProvider {
-    static var previews: some View {
-        PromptView()
-            .environmentObject(PromptEngine.shared)
-    }
-}
-
