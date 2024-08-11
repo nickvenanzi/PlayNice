@@ -11,10 +11,7 @@ import FirebaseAuth
 @main
 struct PlayNiceApp: App {
     
-    @StateObject var timeEngine: TimeEngine = TimeEngine.shared
-    @StateObject var promptEngine: PromptEngine = PromptEngine()
-    @StateObject var userEngine: UserEngine = UserEngine()
-//    @StateObject var answerEngine: AnswerEngine = AnswerEngine.shared
+    @StateObject var appEngine: AppEngine = AppEngine()
 
     init() {
         FirebaseApp.configure()
@@ -23,17 +20,14 @@ struct PlayNiceApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(timeEngine)
-                .environmentObject(promptEngine)
-                .environmentObject(userEngine)
-//                .environmentObject(answerEngine)
+                .environmentObject(appEngine)
                 .onAppear {
                     Auth.auth().signInAnonymously { (authResult, error) in
                         if let _ = error {
                             return
                         }
                         guard let user = authResult?.user else { return }
-                        userEngine.user.firebaseID = user.uid
+                        appEngine.user.firebaseID = user.uid
                     }
                 }
         }

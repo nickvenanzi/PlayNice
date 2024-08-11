@@ -4,17 +4,16 @@ struct PromptView: View {
     @State private var userAnswer: String = ""
     @State private var showAlert: Bool = false
 
-    @EnvironmentObject var promptEngine: PromptEngine
-    @EnvironmentObject var userEngine: UserEngine
+    @EnvironmentObject var appEngine: AppEngine
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text(promptEngine.prompt.text)
+            Text(appEngine.prompt.text)
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top, 20)
             
-            if promptEngine.prompt.submitted {
+            if appEngine.prompt.submitted {
                 Text(userAnswer)
                     .font(.title3)
             } else {
@@ -25,9 +24,8 @@ struct PromptView: View {
                         self.dismissKeyboard()
                         // Handle answer submission
                         showAlert = true
-                        userEngine.submitPrompt(promptEngine.prompt.text, userAnswer) {
-                            promptEngine.prompt.submitted = true
-                        }
+                        appEngine.submitAnswer(userAnswer)
+                        
                     }
                     .alert(isPresented: $showAlert) {
                         Alert(
@@ -37,7 +35,6 @@ struct PromptView: View {
                         )
                     }
             }
-
             Spacer()
         }
         .padding()

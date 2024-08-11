@@ -2,17 +2,17 @@ import SwiftUI
 
 struct RankingView: View {
 
-    @EnvironmentObject var userEngine: UserEngine
+    @EnvironmentObject var appEngine: AppEngine
     
     var rankings: [Answer] {
-        return userEngine.rankings.sorted {
+        return appEngine.rankings.sorted {
             ($0.globalRank ?? Int.max) < ($1.globalRank ?? Int.max)
         }
     }
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(userEngine.rankings.first?.prompt ?? "")
+            Text(appEngine.rankings.first?.prompt ?? "")
                 .font(.title)
                 .padding()
 

@@ -16,9 +16,7 @@ enum Tabs: Equatable, Hashable {
 
 struct ContentView: View {
 
-    @EnvironmentObject var timeEngine: TimeEngine
-    @EnvironmentObject var userEngine: UserEngine
-    @EnvironmentObject var promptEngine: PromptEngine
+    @EnvironmentObject var appEngine: AppEngine
     
     @State private var selectedIndex: Int = 0
     
@@ -51,17 +49,7 @@ struct ContentView: View {
         .tint(.gray)
         .onAppear(perform: {
             UITabBar.appearance().backgroundColor = .systemGray4.withAlphaComponent(0.4)
-            userEngine.getUserDocument()
-        })
-        .onReceive(timeEngine.$today, perform: { newToday in
-            promptEngine.retrievePrompt()
-            userEngine.getUserDocument()
-            userEngine.updateRankingsAndFollowing()
-            print("Today changed")
-            /*
-             TO-DO
-             3. Update User profile
-             */
+            appEngine.getUserDocument{}
         })
     }
 }

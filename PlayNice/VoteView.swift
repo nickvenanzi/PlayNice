@@ -1,28 +1,30 @@
 import SwiftUI
 
 struct VoteView: View {
-    @State private var selectedAnswer: Int? = nil
-    @EnvironmentObject var promptEngine: PromptEngine
     
-    var answers: [Answer] = [] // TO-DO
+    @EnvironmentObject var appEngine: AppEngine
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text(promptEngine.prompt.text)
+            Text(appEngine.prompt.text)
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top, 20)
                 .padding(.horizontal)
 
-            ForEach(0..<answers.count, id: \.self) { index in
+            ForEach(0..<appEngine.currentAnswers.count, id: \.self) { index in
                 AnswerOptionView(
-                    answer: answers[index],
-                    selectedAnswer: selectedAnswer,
-                    isSelected: selectedAnswer == index
+                    answer: appEngine.currentAnswers[index],
+                    selectedAnswer: appEngine.selectedAnswer,
+                    isSelected: appEngine.selectedAnswer == index
                 )
                 .onTapGesture {
                     withAnimation(.easeInOut) {
-                        selectedAnswer = index
+                        appEngine.selectedAnswer = index
+                        appEngine.castVotes()
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        appEngine.getAnswerSet()
                     }
                 }
                 .padding(.horizontal)

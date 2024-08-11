@@ -2,11 +2,11 @@ import SwiftUI
 
 struct ProfileView: View {
     
-    @EnvironmentObject var userEngine: UserEngine
+    @EnvironmentObject var appEngine: AppEngine
     var otherUser: User = User()
     
     var user: User {
-        return isSelf ? userEngine.user : otherUser
+        return isSelf ? appEngine.user : otherUser
     }
 
     @State private var answerListControl = 0
@@ -22,7 +22,7 @@ struct ProfileView: View {
     var body: some View {
         VStack(spacing: 5) {
             if self.isSelf {
-                TextField(user.nickname == "" ? DEFAULT_USERNAME : user.nickname, text: $userEngine.user.nickname)
+                TextField(user.nickname == "" ? DEFAULT_USERNAME : user.nickname, text: $appEngine.user.nickname)
                     .font(.largeTitle)
                     .textFieldStyle(.plain)
                     .frame(maxWidth: .infinity)
@@ -31,12 +31,12 @@ struct ProfileView: View {
                     .autocorrectionDisabled(true)
                     .onChange(of: user.nickname) {
                         if user.nickname.count > MAX_LENGTH {
-                            userEngine.user.nickname = String(user.nickname.prefix(MAX_LENGTH))
+                            appEngine.user.nickname = String(user.nickname.prefix(MAX_LENGTH))
                         }
 
                     }
                     .onSubmit {
-                        userEngine.updateNickname()
+                        appEngine.updateNickname()
                     }
             } else {
                 Text(user.nickname)
