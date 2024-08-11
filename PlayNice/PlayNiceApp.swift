@@ -7,37 +7,19 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseAuth
-//
-//class AppDelegate: NSObject, UIApplicationDelegate {
-//  func application(_ application: UIApplication,
-//                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-//    FirebaseApp.configure()
-//    return true
-//  }
-//}
 
 @main
 struct PlayNiceApp: App {
     
-//    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-
     @StateObject var timeEngine: TimeEngine = TimeEngine.shared
-    @StateObject var promptEngine: PromptEngine = PromptEngine.shared
-    @StateObject var userEngine: UserEngine = UserEngine.shared
+    @StateObject var promptEngine: PromptEngine = PromptEngine()
+    @StateObject var userEngine: UserEngine = UserEngine()
 //    @StateObject var answerEngine: AnswerEngine = AnswerEngine.shared
 
     init() {
         FirebaseApp.configure()
-        Auth.auth().signInAnonymously { (authResult, error) in
-            if let error = error {
-                print("Error signing in anonymously: \(error.localizedDescription)")
-                return
-            }
-            guard let user = authResult?.user else { return }
-            UserEngine.shared.user.firebaseID = user.uid
-            UserEngine.getUserDocument()
-        }
     }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -45,6 +27,15 @@ struct PlayNiceApp: App {
                 .environmentObject(promptEngine)
                 .environmentObject(userEngine)
 //                .environmentObject(answerEngine)
+                .onAppear {
+                    Auth.auth().signInAnonymously { (authResult, error) in
+                        if let _ = error {
+                            return
+                        }
+                        guard let user = authResult?.user else { return }
+                        userEngine.user.firebaseID = user.uid
+                    }
+                }
         }
     }
 }

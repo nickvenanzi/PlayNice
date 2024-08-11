@@ -1,22 +1,22 @@
-////
-////  AnswerEngine.swift
-////  Kevin
-////
-////  Created by Nick Venanzi on 5/28/23.
-////
-//import Firebase
-//import FirebaseFirestore
 //
-//class AnswerEngine {
-//    static var ref: DatabaseReference!
-//    static var db: Firestore!
-//    
-//    static var votedOn: Set<String> = Set()
-//    static var currentAnswers: [Answer] = []
-//    static var answerQueue: Set<Answer> = Set()
-//    static var lastDocID: String?
-//    static var selectedAnswer: Int?
-//    
+//  AnswerEngine.swift
+//  Kevin
+//
+//  Created by Nick Venanzi on 5/28/23.
+
+import Firebase
+import FirebaseFirestore
+
+class AnswerEngine {
+    static var ref: DatabaseReference!
+    static var db: Firestore!
+    
+    static var votedOn: Set<String> = Set()
+    static var currentAnswers: [Answer] = []
+    static var answerQueue: Set<Answer> = Set()
+    static var lastDocID: String?
+    static var selectedAnswer: Int?
+    
 //    /*
 //     Public facing method, tallies votes back into database.
 //     */
@@ -268,4 +268,4 @@
 //            completionHandler(rom, date)
 //        });
 //    }
-//}
+}

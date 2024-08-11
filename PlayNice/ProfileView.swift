@@ -33,9 +33,10 @@ struct ProfileView: View {
                         if user.nickname.count > MAX_LENGTH {
                             userEngine.user.nickname = String(user.nickname.prefix(MAX_LENGTH))
                         }
+
                     }
                     .onSubmit {
-                        UserEngine.updateNickname()
+                        userEngine.updateNickname()
                     }
             } else {
                 Text(user.nickname)

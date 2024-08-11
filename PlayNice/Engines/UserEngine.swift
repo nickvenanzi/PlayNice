@@ -13,53 +13,50 @@ class UserEngine: ObservableObject {
     static var db: Firestore {
         Firestore.firestore()
     }
-    static var shared: UserEngine {
-        UserEngine()
-    }
     
     @Published var rankings: Set<Answer> = Set()
     @Published var following: Set<User> = Set()
     @Published var user: User = User()
     
     init() {
-        UserEngine.retrieveFromCache()
+        retrieveFromCache()
     }
     
     /*
      Retrieves "users" document associated with the current user
      */
-    static func getUserDocument() {
+    func getUserDocument() {
         
-        let userQuery = self.db.collection("users").whereField("id", isEqualTo: shared.user.firebaseID).limit(to: 1)
+        let userQuery = UserEngine.db.collection("users").whereField("id", isEqualTo: user.firebaseID).limit(to: 1)
         userQuery.getDocuments() { (qs, error) in
             guard let snapshot = qs else {
+                self.setNewUserDocument()
                 return
             }
             guard snapshot.documents.count > 0, let document = snapshot.documents.first else {
-                setNewUserDocument()
+                self.setNewUserDocument()
                 return
             }
-        
             let docData = document.data()
-            shared.user.docID = document.documentID
-            shared.user.nickname = docData["username"] as? String ?? "Unknown User"
+            self.user.docID = document.documentID
+            self.user.nickname = docData["username"] as? String ?? "Unknown User"
             let following = docData["following"] as? [String] ?? []
-            shared.user.following = Set(following)
-            shared.user.answers = processAnswersFromDoc(docData, document.documentID)
-            shared.user.orderAnswers()
+            self.user.following = Set(following)
+            self.user.answers = self.processAnswersFromDoc(docData, document.documentID)
+            self.user.orderAnswers()
             return
         }
     }
     
-    static private func setNewUserDocument() {
+    private func setNewUserDocument() {
         var ref: DocumentReference? = nil
-        ref = db.collection("users").addDocument(data: [
+        ref = UserEngine.db.collection("users").addDocument(data: [
             "username": "",
-            "id": shared.user.firebaseID,
+            "id": user.firebaseID,
             "following": [],
         ]) { err in
             if let docID = ref?.documentID {
-                UserEngine.shared.user.docID = docID
+                self.user.docID = docID
             }
         }
     }
@@ -67,7 +64,7 @@ class UserEngine: ObservableObject {
     /*
      Takes as input a "users" doc and processing the doc into answers
      */
-    static private func processAnswersFromDoc(_ doc: [String: Any]?, _ docID: String) -> [AnswerDate: Answer] {
+    private func processAnswersFromDoc(_ doc: [String: Any]?, _ docID: String) -> [AnswerDate: Answer] {
         let result = doc?["answers"] as? [String: Any]
         let author = doc?["username"] as? String ?? "..."
         var answerMap: [AnswerDate: Answer] = [:]
@@ -94,19 +91,19 @@ class UserEngine: ObservableObject {
         return answerMap
     }
     
-    static func updateRankingsAndFollowing() {
-        shared.rankings = Set()
-        shared.following = Set()
+    func updateRankingsAndFollowing() {
+        rankings = Set()
+        following = Set()
         
         let yesterday = TimeEngine.shared.today.dayBefore()
         
-        UserEngine.retrieveTopAnswers(yesterday, 3)
-        UserEngine.retrieveFollowing()
+        retrieveTopAnswers(yesterday, 3)
+        retrieveFollowing()
     }
     
-    static private func retrieveTopAnswers(_ date: AnswerDate, _ limit: Int) {
+    private func retrieveTopAnswers(_ date: AnswerDate, _ limit: Int) {
         let field = "answers." + date.toString() + ".globalRank"
-        let topQuery = self.db.collection("users").order(by: field).limit(to: limit)
+        let topQuery = UserEngine.db.collection("users").order(by: field).limit(to: limit)
         topQuery.getDocuments() { (qs, error) in
             guard let snapshot = qs else {
                 return
@@ -115,30 +112,30 @@ class UserEngine: ObservableObject {
                 return
             }
             for document in snapshot.documents {
-                let answerMap: [AnswerDate: Answer] = processAnswersFromDoc(document.data(), document.documentID)
+                let answerMap: [AnswerDate: Answer] = self.processAnswersFromDoc(document.data(), document.documentID)
                 guard let answer = answerMap[date] else {
                     continue
                 }
-                shared.rankings.insert(answer)
+                self.rankings.insert(answer)
             }
-            UserEngine.storeInCache()
+            self.storeInCache()
             return
         }
     }
 
-    static func retrieveFollowing() {
+    func retrieveFollowing() {
         let yesterday = TimeEngine.shared.today.dayBefore()
 
-        if shared.user.following.isEmpty {
+        if user.following.isEmpty {
             return
         }
 
-        if let selfAnswer = UserEngine.shared.user.answers[yesterday] {
-            shared.rankings.insert(selfAnswer)
+        if let selfAnswer = user.answers[yesterday] {
+            rankings.insert(selfAnswer)
         }
         
-        for friend in shared.user.following {
-            let friendQuery = db.collection("users").document(friend)
+        for friend in user.following {
+            let friendQuery = UserEngine.db.collection("users").document(friend)
             friendQuery.getDocument { (doc, error) in
                 guard let document = doc, let docData = doc?.data() else {
                     return
@@ -148,22 +145,22 @@ class UserEngine: ObservableObject {
                 friend.nickname = docData["username"] as? String ?? "Unknown User"
                 let friendFollowing = docData["following"] as? [String] ?? []
                 friend.following = Set(friendFollowing)
-                friend.answers = processAnswersFromDoc(docData, document.documentID)
+                friend.answers = self.processAnswersFromDoc(docData, document.documentID)
                 friend.orderAnswers()
 
-                shared.following.insert(friend)
+                self.following.insert(friend)
                 
                 if let yesterdayAnswer = friend.answers[yesterday] {
-                    shared.rankings.insert(yesterdayAnswer)
+                    self.rankings.insert(yesterdayAnswer)
                 }
-                UserEngine.storeInCache()
+                self.storeInCache()
             }
         }
     }
 
-    static func storeInCache() {
-        let ranksArray: [Answer] = Array(shared.rankings)
-        let followingArray: [User] = Array(shared.following)
+    func storeInCache() {
+        let ranksArray: [Answer] = Array(rankings)
+        let followingArray: [User] = Array(following)
         let encoder = JSONEncoder()
 
         let ranksData: [Data] = ranksArray.map { answer in
@@ -184,31 +181,54 @@ class UserEngine: ObservableObject {
         UserDefaults.standard.set(followingData, forKey: StorageKeys.FOLLOWING)
     }
 
-    static func retrieveFromCache() {
+    func retrieveFromCache() {
         let decoder = JSONDecoder()
 
         if let ranksData = UserDefaults.standard.object(forKey: StorageKeys.RANKINGS) as? [Data] {
-            shared.rankings = Set()
+            rankings = Set()
             for data in ranksData {
                 if let answer = try? decoder.decode(Answer.self, from: data) {
-                    shared.rankings.insert(answer)
+                    rankings.insert(answer)
                 }
             }
         }
         if let followingData = UserDefaults.standard.object(forKey: StorageKeys.FOLLOWING) as? [Data] {
-            shared.following = Set()
+            following = Set()
             for data in followingData {
                 if let friend = try? decoder.decode(User.self, from: data) {
-                    shared.following.insert(friend)
+                    following.insert(friend)
                 }
             }
         }
     }
     
-    static func updateNickname() {
-        db.collection("users").document(shared.user.docID).updateData([
-            "username": shared.user.nickname
+    func updateNickname() {
+        UserEngine.db.collection("users").document(user.docID).updateData([
+            "username": user.nickname
         ]) { _ in }
+    }
+    
+    /*
+     Public facing method to submit user prompt to database
+     */
+    func submitPrompt(_ prompt: String, _ answer: String, _ completionHandler: @escaping () -> ()) {
+        let date = TimeEngine.shared.today
+        let answerKey = "answers."+date.toString()
+        let userRef = UserEngine.db.collection("users").document(user.docID)
+        userRef.updateData([
+            answerKey: [
+                "answer": answer,
+                "prompt": prompt,
+                "votes": 0,
+                "winPercentage": 0.0,
+                "time": FieldValue.serverTimestamp()
+            ]
+        ]) { _ in
+            var answer = Answer(answer: answer, prompt: prompt, author: self.user.nickname, authorDocID: self.user.docID, winPercentage: 0, votes: 0, date: date)
+            self.user.answers[date] = answer
+            UserDefaults.standard.set(true, forKey: StorageKeys.PROMPT_SUBMITTED)
+            completionHandler()
+        }
     }
     
 //    static func searchUsers(_ searchQuery: String, _ completionHandler: @escaping ([User]) -> ()) {

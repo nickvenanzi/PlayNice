@@ -5,6 +5,7 @@ struct PromptView: View {
     @State private var showAlert: Bool = false
 
     @EnvironmentObject var promptEngine: PromptEngine
+    @EnvironmentObject var userEngine: UserEngine
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -12,34 +13,36 @@ struct PromptView: View {
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top, 20)
-
-            TextField("Write your answer here...", text: $userAnswer)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-
-            Button(action: {
-                // Handle answer submission
-                showAlert = true
-            }) {
-                Text("Submit")
-                    .font(.body)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(10)
+            
+            if promptEngine.prompt.submitted {
+                Text(userAnswer)
+                    .font(.title3)
+            } else {
+                TextField("Write your answer here...", text: $userAnswer)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
-            }
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("Answer Submitted"),
-                    message: Text("Your answer has been submitted."),
-                    dismissButton: .default(Text("OK"))
-                )
+                    .onSubmit {
+                        self.dismissKeyboard()
+                        // Handle answer submission
+                        showAlert = true
+                        userEngine.submitPrompt(promptEngine.prompt.text, userAnswer) {
+                            promptEngine.prompt.submitted = true
+                        }
+                    }
+                    .alert(isPresented: $showAlert) {
+                        Alert(
+                            title: Text("Answer Submitted"),
+                            message: Text(userAnswer),
+                            dismissButton: .default(Text("OK"))
+                        )
+                    }
             }
 
             Spacer()
         }
         .padding()
+        .onTapGesture {
+            self.dismissKeyboard()
+        }
     }
 }

@@ -19,7 +19,6 @@
 		1583923C2C508E49005918D5 /* PromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1583923B2C508E49005918D5 /* PromptView.swift */; };
 		1583923E2C508E63005918D5 /* VoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1583923D2C508E63005918D5 /* VoteView.swift */; };
 		158392432C56B6D0005918D5 /* ProfileAnswerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158392422C56B6D0005918D5 /* ProfileAnswerView.swift */; };
-		158392452C571A2F005918D5 /* Rankings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158392442C571A2F005918D5 /* Rankings.swift */; };
 		158392472C572673005918D5 /* RankingAnswerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158392462C572673005918D5 /* RankingAnswerView.swift */; };
 		158392492C572D80005918D5 /* RankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158392482C572D80005918D5 /* RankView.swift */; };
 		1583924B2C5C5EB8005918D5 /* AnswerPercentageBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1583924A2C5C5EB8005918D5 /* AnswerPercentageBar.swift */; };
@@ -51,7 +50,6 @@
 		1583923B2C508E49005918D5 /* PromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptView.swift; sourceTree = "<group>"; };
 		1583923D2C508E63005918D5 /* VoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteView.swift; sourceTree = "<group>"; };
 		158392422C56B6D0005918D5 /* ProfileAnswerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAnswerView.swift; sourceTree = "<group>"; };
-		158392442C571A2F005918D5 /* Rankings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rankings.swift; sourceTree = "<group>"; };
 		158392462C572673005918D5 /* RankingAnswerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankingAnswerView.swift; sourceTree = "<group>"; };
 		158392482C572D80005918D5 /* RankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankView.swift; sourceTree = "<group>"; };
 		1583924A2C5C5EB8005918D5 /* AnswerPercentageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnswerPercentageBar.swift; sourceTree = "<group>"; };
@@ -128,7 +126,6 @@
 			children = (
 				1583922F2C50833A005918D5 /* User.swift */,
 				158392312C5083DD005918D5 /* Answer.swift */,
-				158392442C571A2F005918D5 /* Rankings.swift */,
 				158392602C5DD97D005918D5 /* StorageKeys.swift */,
 				158392662C5F287F005918D5 /* Prompt.swift */,
 			);
@@ -257,7 +254,6 @@
 				1583923A2C508A95005918D5 /* ProfileView.swift in Sources */,
 				158392632C5E68D2005918D5 /* TimeEngine.swift in Sources */,
 				15328E252C5066D800A170F2 /* PlayNiceApp.swift in Sources */,
-				158392452C571A2F005918D5 /* Rankings.swift in Sources */,
 				158392492C572D80005918D5 /* RankView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

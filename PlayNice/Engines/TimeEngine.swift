@@ -20,8 +20,6 @@ class TimeEngine: ObservableObject {
         let lastDate = UserDefaults.standard.string(forKey: StorageKeys.DATE)
         if let todayStr = lastDate {
             today = AnswerDate.fromString(todayStr)
-        } else {
-            today = AnswerDate()
         }
         timer = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
