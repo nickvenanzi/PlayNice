@@ -2,8 +2,8 @@ import SwiftUI
 
 struct PromptView: View {
     @State private var userAnswer: String = ""
-    @State private var showAlert: Bool = false
 
+    @StateObject var alert: SubmitAlert = SubmitAlert()
     @EnvironmentObject var appEngine: AppEngine
 
     var body: some View {
@@ -14,7 +14,7 @@ struct PromptView: View {
                 .padding(.top, 20)
             
             if appEngine.prompt.submitted {
-                Text(userAnswer)
+                Text(appEngine.user.answers[appEngine.today]?.answer ?? userAnswer)
                     .font(.title3)
             } else {
                 TextField("Write your answer here...", text: $userAnswer)
@@ -23,11 +23,11 @@ struct PromptView: View {
                     .onSubmit {
                         self.dismissKeyboard()
                         // Handle answer submission
-                        showAlert = true
+                        alert.presented = true
                         appEngine.submitAnswer(userAnswer)
                         
                     }
-                    .alert(isPresented: $showAlert) {
+                    .alert(isPresented: $alert.presented) {
                         Alert(
                             title: Text("Answer Submitted"),
                             message: Text(userAnswer),
@@ -42,4 +42,8 @@ struct PromptView: View {
             self.dismissKeyboard()
         }
     }
+}
+
+class SubmitAlert: ObservableObject {
+    @Published var presented: Bool = false
 }

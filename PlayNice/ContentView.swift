@@ -17,6 +17,7 @@ enum Tabs: Equatable, Hashable {
 struct ContentView: View {
 
     @EnvironmentObject var appEngine: AppEngine
+    @Environment(\.scenePhase) var scenePhase
     
     @State private var selectedIndex: Int = 0
     
@@ -45,12 +46,27 @@ struct ContentView: View {
                     Text("Profile")
                     Image(systemName: "person.text.rectangle")
                 }
+            
+            DebugView()
+                .tabItem {
+                    Text("Debug")
+                    Image(systemName: "ant")
+                }
         }
         .tint(.gray)
         .onAppear(perform: {
             UITabBar.appearance().backgroundColor = .systemGray4.withAlphaComponent(0.4)
             appEngine.getUserDocument{}
         })
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .background {
+                appEngine.timer?.cancel()
+                appEngine.storeInCache()
+            } else if newPhase == .active {
+                appEngine.initializeTimer()
+                appEngine.retrieveFromCache()
+            }
+        }
     }
 }
 

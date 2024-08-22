@@ -29,21 +29,29 @@ class AppEngine: ObservableObject {
     @Published var following: Set<User> = Set()
     @Published var user: User = User()
     
+    @Published var debugCounter: Int = 0
+    
     init() {
         retrieveFromCache()
+        initializeTimer()
+    }
+    
+    deinit {
+        timer?.cancel()
+    }
+    
+    func initializeTimer() {
         timer = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
+                self?.debugCounter += 1
                 if AnswerDate() != self?.today {
+                    self?.debugCounter = 11123
                     self?.today = AnswerDate()
                     UserDefaults.standard.set(self?.today.toString(), forKey: StorageKeys.DATE)
                     self?.newDay()
                 }
             }
-    }
-    
-    deinit {
-        timer?.cancel()
     }
     
     /*
@@ -62,7 +70,7 @@ class AppEngine: ObservableObject {
         UserDefaults.standard.set(nil, forKey: StorageKeys.LAST_NEW_DOC)
         UserDefaults.standard.set(nil, forKey: StorageKeys.ANSWER_QUEUE)
         UserDefaults.standard.set(nil, forKey: StorageKeys.PROMPT)
-        UserDefaults.standard.set(nil, forKey: StorageKeys.PROMPT_SUBMITTED)
+        UserDefaults.standard.set(false, forKey: StorageKeys.PROMPT_SUBMITTED)
         UserDefaults.standard.set(nil, forKey: StorageKeys.VOTED_ON)
         UserDefaults.standard.set(nil, forKey: StorageKeys.RANKINGS)
         
@@ -144,6 +152,7 @@ class AppEngine: ObservableObject {
     }
     
     func retrievePrompt() {
+        print("Retrieving Prompt...")
         let today = AnswerDate().toString()
         AppEngine.db.collection("prompts").whereField("date", isEqualTo: today).getDocuments() { (querySnapshot, err) in
             if let _ = err { return }
@@ -239,7 +248,7 @@ class AppEngine: ObservableObject {
         userRef.updateData([
             answerKey: [
                 "answer": answer,
-                "prompt": prompt,
+                "prompt": prompt.text,
                 "votes": 0,
                 "winPercentage": 0.0,
                 "time": FieldValue.serverTimestamp()
@@ -247,6 +256,7 @@ class AppEngine: ObservableObject {
         ]) { _ in
             let answer = Answer(answer: answer, prompt: self.prompt.text, author: self.user.nickname, authorDocID: self.user.docID, winPercentage: 0, votes: 0, date: date)
             self.user.answers[date] = answer
+            self.user.orderAnswers() // new answer wont be in ordered answers arrays until calling this
             UserDefaults.standard.set(true, forKey: StorageKeys.PROMPT_SUBMITTED)
             self.prompt.submitted = true
         }
@@ -339,7 +349,7 @@ class AppEngine: ObservableObject {
         }
         
         // grab newest answers
-        var newQuery = AppEngine.db.collection("users").order(by: "answers."+dateStr+".votes").limit(to: 20)
+        let newQuery = AppEngine.db.collection("users").order(by: "answers."+dateStr+".votes").limit(to: 20)
         if let topDoc = lastNewDoc {
             topQuery = topQuery.start(afterDocument: topDoc)
         }
@@ -424,7 +434,13 @@ class AppEngine: ObservableObject {
         if let todayStr = UserDefaults.standard.string(forKey: StorageKeys.DATE) {
             today = AnswerDate.fromString(todayStr)
         } else {
+            debugCounter = -99999
             newDay()
+        }
+        
+        if let promptStr = UserDefaults.standard.string(forKey: StorageKeys.PROMPT) {
+            prompt.text = promptStr
+            prompt.submitted = UserDefaults.standard.bool(forKey: StorageKeys.PROMPT_SUBMITTED)
         }
 
         if let ranksData = UserDefaults.standard.object(forKey: StorageKeys.RANKINGS) as? [Data] {
