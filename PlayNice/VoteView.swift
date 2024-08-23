@@ -11,6 +11,10 @@ struct VoteView: View {
                 .fontWeight(.bold)
                 .padding(.top, 20)
                 .padding(.horizontal)
+            
+            if appEngine.currentAnswers.count == 0 {
+                Text("No more answers available.  Come back later for more!")
+            }
 
             ForEach(0..<appEngine.currentAnswers.count, id: \.self) { index in
                 AnswerOptionView(
@@ -19,16 +23,26 @@ struct VoteView: View {
                     isSelected: appEngine.selectedAnswer == index
                 )
                 .onTapGesture {
+                    // locally change %'s
+                    for i in 0..<appEngine.currentAnswers.count {
+                        var wins = appEngine.currentAnswers[i].winPercentage * Float(appEngine.currentAnswers[i].votes)
+                        appEngine.currentAnswers[i].votes += 1
+                        if i == index {
+                            wins += 1.0
+                        }
+                        appEngine.currentAnswers[i].winPercentage = wins / Float(appEngine.currentAnswers[i].votes)
+                    }
                     withAnimation(.easeInOut) {
                         appEngine.selectedAnswer = index
                         appEngine.castVotes()
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                         appEngine.getAnswerSet()
                     }
                 }
                 .padding(.horizontal)
             }
+            Spacer()
         }
         .padding()
     }

@@ -76,6 +76,7 @@ class AppEngine: ObservableObject {
         
         retrievePrompt()
         getUserDocument {
+            print("Got user document")
             self.updateRankingsAndFollowing()
         }
         getAnswerSet()
@@ -90,11 +91,15 @@ class AppEngine: ObservableObject {
         let userQuery = AppEngine.db.collection("users").whereField("id", isEqualTo: user.firebaseID).limit(to: 1)
         userQuery.getDocuments() { (qs, error) in
             guard let snapshot = qs else {
-                self.setNewUserDocument()
+                self.setNewUserDocument {
+                    completionHandler()
+                }
                 return
             }
             guard snapshot.documents.count > 0, let document = snapshot.documents.first else {
-                self.setNewUserDocument()
+                self.setNewUserDocument {
+                    completionHandler()
+                }
                 return
             }
             let docData = document.data()
@@ -104,11 +109,12 @@ class AppEngine: ObservableObject {
             self.user.following = Set(following)
             self.user.answers = self.processAnswersFromDoc(docData, document.documentID)
             self.user.orderAnswers()
+            completionHandler()
             return
         }
     }
     
-    private func setNewUserDocument() {
+    private func setNewUserDocument(_ completionHandler: @escaping () -> ()) {
         var ref: DocumentReference? = nil
         ref = AppEngine.db.collection("users").addDocument(data: [
             "username": "",
@@ -118,6 +124,7 @@ class AppEngine: ObservableObject {
             if let docID = ref?.documentID {
                 self.user.docID = docID
             }
+            completionHandler()
         }
     }
     
@@ -176,6 +183,7 @@ class AppEngine: ObservableObject {
     }
     
     private func retrieveTopAnswers(_ date: AnswerDate, _ limit: Int) {
+        print("retrieving Top Answers from \(date.toString())")
         let field = "answers." + date.toString() + ".globalRank"
         let topQuery = AppEngine.db.collection("users").order(by: field).limit(to: limit)
         topQuery.getDocuments() { (qs, error) in
@@ -192,6 +200,7 @@ class AppEngine: ObservableObject {
                 }
                 self.rankings.insert(answer)
             }
+            print("Rankings count: \(self.rankings.count)")
             self.storeInCache()
             return
         }
@@ -306,6 +315,7 @@ class AppEngine: ObservableObject {
      Public facing method, inserts up to 4 answers as a list into currentAnswers.  If unable to provide at least 2 answers, currentAnswers remains empty.
      */
     func getAnswerSet() {
+        print("getAnswerSet called")
         selectedAnswer = nil
         currentAnswers = []
         // if less than 2 answers, you need more answers to have a vote set

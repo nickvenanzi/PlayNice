@@ -14,7 +14,15 @@ struct DebugView: View {
             Text("Today: \(appEngine.today.toString())")
                 .font(.title3)
             
-            Spacer()
+            Text("Number of answers in rankings: \(appEngine.rankings.count)")
+            
+            Text("Number of answers voted on: \(appEngine.votedOn.count)")
+            
+            Text("Number of answers in VoteView: \(appEngine.currentAnswers.count)")
+
+            Text("Number of answers on deck: \(appEngine.answerQueue.count)")
+
+            
         }
         .padding()
     }

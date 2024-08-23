@@ -28,30 +28,35 @@ struct ContentView: View {
                     Text("Prompt")
                     Image(systemName: "person.text.rectangle")
                 }
+                .tag(0)
             
             VoteView()
                 .tabItem {
                     Text("Vote")
                     Image(systemName: "figure.gymnastics")
                 }
+                .tag(1)
             
             RankingView()
                 .tabItem {
                     Text("Ranking")
                     Image(systemName: "list.number")
                 }
+                .tag(2)
             
             ProfileView(isSelf: true)
                 .tabItem {
                     Text("Profile")
                     Image(systemName: "person.text.rectangle")
                 }
+                .tag(3)
             
             DebugView()
                 .tabItem {
                     Text("Debug")
                     Image(systemName: "ant")
                 }
+                .tag(4)
         }
         .tint(.gray)
         .onAppear(perform: {
@@ -65,6 +70,14 @@ struct ContentView: View {
             } else if newPhase == .active {
                 appEngine.initializeTimer()
                 appEngine.retrieveFromCache()
+            }
+        }
+        .onChange(of: appEngine.prompt.submitted) { _, isSubmitted in
+            print("Submitted state changed: \(isSubmitted)")
+            if isSubmitted {
+                selectedIndex = 1 // VoteView
+            } else {
+                selectedIndex = 0 // PromptView
             }
         }
     }
