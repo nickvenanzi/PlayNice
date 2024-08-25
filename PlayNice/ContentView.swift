@@ -57,6 +57,13 @@ struct ContentView: View {
                     Image(systemName: "ant")
                 }
                 .tag(4)
+            
+            DeveloperView()
+                .tabItem {
+                    Text("Developer")
+                    Image(systemName: "hammer")
+                }
+                .tag(4)
         }
         .tint(.gray)
         .onAppear(perform: {

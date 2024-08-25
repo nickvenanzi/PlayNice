@@ -28,11 +28,6 @@ struct PromptView: View {
                     .onChange(of: userAnswer) {
                         recalculateHeight()
                     }
-                    .onSubmit {
-                        self.dismissKeyboard()
-                        // Handle answer submission
-                        appEngine.submitAnswer(userAnswer)
-                    }
                 
                 Button(action: {
                     self.dismissKeyboard()
