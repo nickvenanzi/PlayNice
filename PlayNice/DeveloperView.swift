@@ -8,8 +8,10 @@ struct DeveloperView: View {
     
     var body: some View {
         NavigationView {
-            List(devService.prompts) { fsPrompt in
-                NavigationLink(destination: DeveloperPromptView(fsPrompt: fsPrompt)) {
+            List(devService.prompts.values.sorted {
+                AnswerDate.fromString($0.date) > AnswerDate.fromString($1.date)
+            }) { fsPrompt in
+                NavigationLink(destination: DeveloperPromptView(date: fsPrompt.date).environmentObject(devService)) {
                     Text(fsPrompt.date)
                     Text(fsPrompt.prompt)
                 }
@@ -22,23 +24,29 @@ struct DeveloperView: View {
 }
 
 struct DeveloperPromptView: View {
-    let fsPrompt: FSPrompt
+    var date: String
+    @State var editedPrompt: String = ""
+    @EnvironmentObject var devService: DeveloperService
         
+    init(date: String) {
+        self.date = date
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Display the prompt date
-            Text(fsPrompt.date)
+            Text(devService.prompts[date]?.date ?? "Error")
                 .font(.headline)
             
             // TextField for editing the prompt
-            TextField(fsPrompt.prompt, text: fsPrompt.$prompt, onCommit: {
+            TextField(devService.prompts[date]?.prompt ?? "", text: $editedPrompt, onCommit: {
                 updatePrompt()
             })
             .textFieldStyle(RoundedBorderTextFieldStyle())
             .padding()
             
             // List of answers
-            if let answers = fsPrompt.answers {
+            if let answers = devService.prompts[date]?.answers {
                 List(answers, id: \.self) { answer in
                     Text(answer)
                 }
@@ -46,30 +54,33 @@ struct DeveloperPromptView: View {
                 Text("No answers generated")
                     .foregroundColor(.gray)
             }
+            Spacer()
         }
         .padding()
         .navigationTitle("Prompt")
     }
         
     private func updatePrompt() {
-        guard let documentID = prompt.id else { return }
+        guard let documentID = devService.prompts[date]?.id else { return }
         
-        db.collection("prompts").document(documentID).updateData([
-            "prompt": editedPrompt
+        AppEngine.db.collection("prompts").document(documentID).updateData([
+            "prompt": editedPrompt,
+            "answers": FieldValue.delete()
         ]) { error in
             if let error = error {
                 print("Error updating prompt: \(error)")
             } else {
                 // Successfully updated prompt
                 print("Prompt successfully updated")
-                prompt.name = editedPrompt
+                self.devService.prompts[self.date]?.answers = nil
+                self.devService.prompts[self.date]?.prompt = editedPrompt
             }
         }
     }
 }
 
 class DeveloperService: ObservableObject {
-    @Published var prompts: [FSPrompt] = []
+    @Published var prompts: [String: FSPrompt] = [:]
     private var listener: ListenerRegistration?
     
     init() {
@@ -82,18 +93,25 @@ class DeveloperService: ObservableObject {
                 print("Error fetching prompts: \(error)")
                 return
             }
-            
-            self.prompts = snapshot?.documents.compactMap { document in
+            print("Found \(snapshot?.documents.count ?? 0) documents in the prompts collection")
+            self.prompts = Dictionary(uniqueKeysWithValues: snapshot?.documents.compactMap { document in
                 try? document.data(as: FSPrompt.self)
-            } ?? []
+            }.map { prompt in
+                (prompt.date, prompt) // Create a tuple with 'date' as the key and 'prompt' as the value
+            } ?? [])
         }
+    }
+    
+    deinit {
+        listener?.remove()
+        listener = nil
     }
 }
 
 struct FSPrompt: Identifiable, Codable {
     @DocumentID var id: String?
     var date: String
-    var count: Int
+    var count: Int?
     var prompt: String
     var answers: [String]?
 }
