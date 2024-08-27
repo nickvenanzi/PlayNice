@@ -50,14 +50,7 @@ struct ContentView: View {
                     Image(systemName: "person.text.rectangle")
                 }
                 .tag(3)
-            
-            DebugView()
-                .tabItem {
-                    Text("Debug")
-                    Image(systemName: "ant")
-                }
-                .tag(4)
-            
+
             DeveloperView()
                 .tabItem {
                     Text("Developer")

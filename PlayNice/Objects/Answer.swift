@@ -133,6 +133,28 @@ struct AnswerDate: Hashable, Comparable, Codable, Equatable {
         return yesterday
     }
     
+    func dayAfter() -> AnswerDate {
+        let thirtyOne: Set<Int> = Set([1,3,5,7,8,10,12])
+        
+        var tomorrow = AnswerDate(year, month, day + 1)
+        
+        if (
+            (tomorrow.day > 31) ||
+            (tomorrow.day > 30 && !thirtyOne.contains(tomorrow.month)) ||
+            (tomorrow.day > 29 && tomorrow.month == 2) ||
+            (tomorrow.day > 28 && tomorrow.month == 2 && tomorrow.year % 4 != 0)
+        ) {
+            tomorrow.day = 1
+            tomorrow.month += 1
+        }
+        
+        if tomorrow.month > 12 {
+            tomorrow.month = 1
+            tomorrow.year += 1
+        }
+        return tomorrow
+    }
+    
     static func fromString(_ dateString: String) -> AnswerDate {
         let pieces = dateString.components(separatedBy: "-")
         return AnswerDate(Int(pieces[0]) ?? 0, Int(pieces[1]) ?? 0, Int(pieces[2]) ?? 0)
