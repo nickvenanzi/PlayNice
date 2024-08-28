@@ -76,7 +76,6 @@ class AppEngine: ObservableObject {
         
         retrievePrompt()
         getUserDocument {
-            print("Got user document")
             self.updateRankingsAndFollowing()
         }
         getAnswerSet()
@@ -183,7 +182,6 @@ class AppEngine: ObservableObject {
     }
     
     private func retrieveTopAnswers(_ date: AnswerDate, _ limit: Int) {
-        print("retrieving Top Answers from \(date.toString())")
         let field = "answers." + date.toString() + ".globalRank"
         let topQuery = AppEngine.db.collection("users").order(by: field).limit(to: limit)
         topQuery.getDocuments() { (qs, error) in

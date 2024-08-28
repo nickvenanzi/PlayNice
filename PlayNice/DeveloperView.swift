@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseFirestore
+import FirebaseMessaging
 
 struct DeveloperView: View {
 

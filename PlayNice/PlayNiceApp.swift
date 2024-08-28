@@ -15,10 +15,6 @@ struct PlayNiceApp: App {
 
     @StateObject var appEngine: AppEngine = AppEngine()
 
-    init() {
-        FirebaseApp.configure()
-    }
-
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -36,9 +32,10 @@ struct PlayNiceApp: App {
     }
 }
 
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
         
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        FirebaseApp.configure()
         // Override point for customization after application launch.
         Messaging.messaging().delegate = self
         
@@ -51,7 +48,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         )
         
         application.registerForRemoteNotifications()
-        
         return true
     }
     
@@ -75,7 +71,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     // [START refresh_token]
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        
+        print("subscribed")
+
         let dataDict: [String: String] = ["token": fcmToken ?? ""]
         NotificationCenter.default.post(
             name: Notification.Name("FCMToken"),
@@ -83,6 +80,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             userInfo: dataDict
         )
         Messaging.messaging().subscribe(toTopic: "prompt") { _ in }
-        print("subscribed")
     }
 }
+
