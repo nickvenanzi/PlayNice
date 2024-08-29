@@ -106,7 +106,7 @@ class AppEngine: ObservableObject {
             self.user.nickname = docData["username"] as? String ?? "Unknown User"
             let following = docData["following"] as? [String] ?? []
             self.user.following = Set(following)
-            self.user.answers = self.processAnswersFromDoc(docData, document.documentID)
+            self.user.answers = AppEngine.processAnswersFromDoc(docData, document.documentID)
             self.user.orderAnswers()
             completionHandler()
             return
@@ -130,7 +130,7 @@ class AppEngine: ObservableObject {
     /*
      Takes as input a "users" doc and processing the doc into answers
      */
-    private func processAnswersFromDoc(_ doc: [String: Any]?, _ docID: String) -> [AnswerDate: Answer] {
+    static func processAnswersFromDoc(_ doc: [String: Any]?, _ docID: String) -> [AnswerDate: Answer] {
         let result = doc?["answers"] as? [String: Any]
         let author = doc?["username"] as? String ?? "..."
         var answerMap: [AnswerDate: Answer] = [:]
@@ -192,7 +192,7 @@ class AppEngine: ObservableObject {
                 return
             }
             for document in snapshot.documents {
-                let answerMap: [AnswerDate: Answer] = self.processAnswersFromDoc(document.data(), document.documentID)
+                let answerMap: [AnswerDate: Answer] = AppEngine.processAnswersFromDoc(document.data(), document.documentID)
                 guard let answer = answerMap[date] else {
                     continue
                 }
@@ -226,7 +226,7 @@ class AppEngine: ObservableObject {
                 friend.nickname = docData["username"] as? String ?? "Unknown User"
                 let friendFollowing = docData["following"] as? [String] ?? []
                 friend.following = Set(friendFollowing)
-                friend.answers = self.processAnswersFromDoc(docData, document.documentID)
+                friend.answers = AppEngine.processAnswersFromDoc(docData, document.documentID)
                 friend.orderAnswers()
 
                 self.following.insert(friend)

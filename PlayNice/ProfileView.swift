@@ -15,8 +15,13 @@ struct ProfileView: View {
     let DEFAULT_USERNAME: String = "[username]"
     let MAX_LENGTH: Int = 20
 
-    init(isSelf: Bool) {
-        self.isSelf = isSelf
+    init() {
+        self.isSelf = true
+    }
+    
+    init(_ otherUser: User) {
+        self.isSelf = false
+        self.otherUser = otherUser
     }
     
     var body: some View {

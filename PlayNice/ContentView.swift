@@ -44,7 +44,7 @@ struct ContentView: View {
                 }
                 .tag(2)
             
-            ProfileView(isSelf: true)
+            ProfileView()
                 .tabItem {
                     Text("Profile")
                     Image(systemName: "person.text.rectangle")

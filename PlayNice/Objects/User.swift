@@ -47,6 +47,25 @@ struct User: Hashable, Encodable, Decodable {
         return "\(Int(average * 100))%"
     }
     
+    func getAverage() -> Float {
+        guard !answers.isEmpty else {
+            return 0
+        }
+        let total = orderedAnswersByWinPercentage.reduce(0, { sum, nextAnswer in
+            sum + nextAnswer.winPercentage
+        })
+        return total / Float(orderedAnswersByWinPercentage.count)
+    }
+    
+    func getTotalWins() -> Int {
+        guard !answers.isEmpty else {
+            return 0
+        }
+        return Int(answers.reduce(0.0, { sum, nextAnswer in
+            sum + (Float(nextAnswer.value.votes) * nextAnswer.value.winPercentage)
+        }))
+    }
+    
     func getPreviousWinPercentage() -> String {
         guard !answers.isEmpty else {
             return "N/A"

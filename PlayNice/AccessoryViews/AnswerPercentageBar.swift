@@ -4,12 +4,20 @@ struct AnswerPercentageBar: View {
     let answer: Answer
     var includeVotes: Bool = true
     let barColor: Color
+    var postfix: String = "votes"
     @State private var animationProgress: Float
 
     init(_ answer: Answer) {
         self.answer = answer
         self.animationProgress = 1.0
         self.barColor = .green
+    }
+    
+    init(_ answer: Answer, _ postfix: String) {
+        self.answer = answer
+        self.animationProgress = 1.0
+        self.barColor = .green
+        self.postfix = postfix
     }
     
     init(_ answer: Answer, includeVotes: Bool, progress: Float, color: Color) {
@@ -22,7 +30,7 @@ struct AnswerPercentageBar: View {
     var body: some View {
         HStack {
             if includeVotes {
-                Text("\(answer.votes) votes")
+                Text("\(answer.votes) \(postfix)")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .frame(width: 70)
