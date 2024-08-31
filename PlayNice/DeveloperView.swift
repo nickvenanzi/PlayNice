@@ -214,7 +214,6 @@ class DeveloperService: ObservableObject {
 struct FSPrompt: Identifiable, Codable, Hashable {
     @DocumentID var id: String?
     var date: String
-    var count: Int?
     var prompt: String
     var answers: [String]?
 }
