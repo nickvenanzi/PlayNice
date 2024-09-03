@@ -5,12 +5,13 @@ struct VoteView: View {
     @EnvironmentObject var appEngine: AppEngine
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        ScrollView {
             Text(appEngine.prompt.text)
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top, 20)
                 .padding(.horizontal)
+                .padding(.bottom, 20)
             
             if appEngine.currentAnswers.count == 0 {
                 Text("No more answers available.  Come back later for more!")
@@ -36,7 +37,7 @@ struct VoteView: View {
                         appEngine.selectedAnswer = index
                         appEngine.castVotes()
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         appEngine.getAnswerSet()
                     }
                 }
@@ -45,6 +46,9 @@ struct VoteView: View {
             Spacer()
         }
         .padding()
+        .refreshable {
+            appEngine.getAnswerSet()
+        }
     }
 }
 

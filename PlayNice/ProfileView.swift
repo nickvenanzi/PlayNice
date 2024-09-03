@@ -1,32 +1,34 @@
 import SwiftUI
 
 struct ProfileView: View {
-    
+        
     @EnvironmentObject var appEngine: AppEngine
+    
     var otherUser: User = User()
     
     var user: User {
         return isSelf ? appEngine.user : otherUser
     }
-
+    
     @State private var answerListControl = 0
 
     var isSelf: Bool
+    
     let DEFAULT_USERNAME: String = "[username]"
     let MAX_LENGTH: Int = 20
-
+    
     init() {
         self.isSelf = true
     }
     
     init(_ otherUser: User) {
-        self.isSelf = false
         self.otherUser = otherUser
+        self.isSelf = false
     }
     
     var body: some View {
         VStack(spacing: 5) {
-            if self.isSelf {
+            if isSelf {
                 TextField(user.nickname == "" ? DEFAULT_USERNAME : user.nickname, text: $appEngine.user.nickname)
                     .font(.largeTitle)
                     .textFieldStyle(.plain)
@@ -41,7 +43,7 @@ struct ProfileView: View {
 
                     }
                     .onSubmit {
-                        appEngine.updateNickname()
+                        AppEngine.updateNickname(appEngine.user)
                     }
             } else {
                 Text(user.nickname)

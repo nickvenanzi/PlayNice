@@ -28,9 +28,7 @@ class AppEngine: ObservableObject {
     @Published var rankings: Set<Answer> = Set()
     @Published var following: Set<User> = Set()
     @Published var user: User = User()
-    
-    @Published var debugCounter: Int = 0
-    
+        
     init() {
         retrieveFromCache()
         initializeTimer()
@@ -44,9 +42,7 @@ class AppEngine: ObservableObject {
         timer = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
-                self?.debugCounter += 1
                 if AnswerDate() != self?.today {
-                    self?.debugCounter = 11123
                     self?.today = AnswerDate()
                     UserDefaults.standard.set(self?.today.toString(), forKey: StorageKeys.DATE)
                     self?.newDay()
@@ -158,7 +154,6 @@ class AppEngine: ObservableObject {
     }
     
     func retrievePrompt() {
-        print("Retrieving Prompt...")
         let today = AnswerDate().toString()
         AppEngine.db.collection("prompts").whereField("date", isEqualTo: today).getDocuments() { (querySnapshot, err) in
             if let _ = err { return }
@@ -198,7 +193,6 @@ class AppEngine: ObservableObject {
                 }
                 self.rankings.insert(answer)
             }
-            print("Rankings count: \(self.rankings.count)")
             self.storeInCache()
             return
         }
@@ -239,7 +233,7 @@ class AppEngine: ObservableObject {
         }
     }
     
-    func updateNickname() {
+    static func updateNickname(_ user: User) {
         AppEngine.db.collection("users").document(user.docID).updateData([
             "username": user.nickname
         ]) { _ in }
@@ -313,7 +307,6 @@ class AppEngine: ObservableObject {
      Public facing method, inserts up to 4 answers as a list into currentAnswers.  If unable to provide at least 2 answers, currentAnswers remains empty.
      */
     func getAnswerSet() {
-        print("getAnswerSet called")
         selectedAnswer = nil
         currentAnswers = []
         // if less than 2 answers, you need more answers to have a vote set
@@ -442,7 +435,6 @@ class AppEngine: ObservableObject {
         if let todayStr = UserDefaults.standard.string(forKey: StorageKeys.DATE) {
             today = AnswerDate.fromString(todayStr)
         } else {
-            debugCounter = -99999
             newDay()
         }
         

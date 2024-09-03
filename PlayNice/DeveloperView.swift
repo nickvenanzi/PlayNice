@@ -49,7 +49,8 @@ struct DeveloperView: View {
                             ForEach(devService.users.indices, id: \.self) { index in
                                 Text("\(index + 1).")
                                 let user = devService.users[index]
-                                NavigationLink(destination: ProfileView(user)) {
+                                NavigationLink(destination: DeveloperProfileView(index: index)
+                                    .environmentObject(devService)) {
                                     VStack {
                                         HStack(spacing: 5) {
                                             Text(user.nickname)
@@ -77,6 +78,7 @@ struct DeveloperView: View {
 struct DeveloperPromptView: View {
     var date: String
     @State var editedPrompt: String = ""
+    @State var editedContext: String = ""
     @EnvironmentObject var devService: DeveloperService
         
     init(date: String) {
@@ -92,10 +94,16 @@ struct DeveloperPromptView: View {
                     .padding(.horizontal)
                 
                 if AnswerDate.fromString(prompt.date) > AnswerDate() {
-                    TextField(prompt.prompt, text: $editedPrompt, onCommit: {
-                        updatePrompt()
-                    })
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    VStack {
+                        TextField(prompt.prompt, text: $editedPrompt, onCommit: {
+                            updatePrompt()
+                        })
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        TextField(prompt.context ?? "Add context for ChatGPT", text: $editedContext, onCommit: {
+                            updatePrompt()
+                        })
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
                 } else {
                     Text(prompt.prompt)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -119,8 +127,12 @@ struct DeveloperPromptView: View {
     private func updatePrompt() {
         guard let documentID = devService.prompts[date]?.id else { return }
         
+        if editedPrompt == "" {
+            editedPrompt = devService.prompts[date]?.prompt ?? ""
+        }
         AppEngine.db.collection("prompts").document(documentID).updateData([
             "prompt": editedPrompt,
+            "context": editedContext,
             "answers": FieldValue.delete()
         ]) { error in
             if let error = error {
@@ -129,10 +141,99 @@ struct DeveloperPromptView: View {
                 // Successfully updated prompt
                 self.devService.prompts[self.date]?.answers = nil
                 self.devService.prompts[self.date]?.prompt = editedPrompt
+                self.devService.prompts[self.date]?.context = editedContext
             }
         }
     }
 }
+
+struct DeveloperProfileView: View {
+        
+    @EnvironmentObject var devService: DeveloperService
+    
+    var index: Int
+    
+    var user: User {
+        return devService.users[index]
+    }
+    
+    @State private var answerListControl = 0
+    
+    let MAX_LENGTH: Int = 20
+    
+    init(index: Int) {
+        self.index = index
+    }
+    
+    var body: some View {
+        VStack(spacing: 5) {
+
+            TextField(user.nickname, text: $devService.users[index].nickname)
+                .font(.largeTitle)
+                .textFieldStyle(.plain)
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled(true)
+                .onChange(of: user.nickname) {
+                    if user.nickname.count > MAX_LENGTH {
+                        devService.users[index].nickname = String(user.nickname.prefix(MAX_LENGTH))
+                    }
+
+                }
+                .onSubmit {
+                    AppEngine.updateNickname(user)
+                }
+            
+            let medals: String = user.getMedals()
+            if (!medals.isEmpty) {
+                Text(medals)
+            }
+    
+            HStack {
+                Spacer()
+                VStack {
+                    Text(user.getPreviousWinPercentage())
+                        .font(.largeTitle)
+
+                    Text("Recent")
+                        .font(.body)
+                }
+                Spacer()
+                VStack {
+                    Text(user.getAverageWinPercentage())
+                        .font(.largeTitle)
+
+                    Text("Average")
+                        .font(.body)
+                }
+                Spacer()
+                VStack {
+                    Text(user.getBestWinPercentage())
+                        .font(.largeTitle)
+
+                    Text("Best")
+                        .font(.body)
+                }
+                Spacer()
+            }
+            Picker("Options", selection: $answerListControl) {
+                Text("Recent").tag(0)
+                Text("Highest").tag(1)
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+            
+            List {
+                ForEach(0..<user.answers.count, id: \.self) { index in
+                    let answer: Answer = user.getAnswer(index, answerListControl == 0 ? .DATE : .WIN_PERCENTAGE)
+                    ProfileAnswerView(answer)
+                }
+            }
+        }
+    }
+}
+
 
 class DeveloperService: ObservableObject {
     @Published var prompts: [String: FSPrompt] = [:]
@@ -189,6 +290,7 @@ class DeveloperService: ObservableObject {
             "date": prompt.date,
             "prompt": prompt.prompt,
             "answers": [""],
+            "context": ""
         ])
     }
     
@@ -215,5 +317,6 @@ struct FSPrompt: Identifiable, Codable, Hashable {
     @DocumentID var id: String?
     var date: String
     var prompt: String
+    var context: String?
     var answers: [String]?
 }

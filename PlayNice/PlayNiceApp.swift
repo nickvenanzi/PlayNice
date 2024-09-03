@@ -26,6 +26,7 @@ struct PlayNiceApp: App {
                         }
                         guard let user = authResult?.user else { return }
                         appEngine.user.firebaseID = user.uid
+                        appEngine.getUserDocument{}
                     }
                 }
         }
@@ -71,8 +72,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
     
     // [START refresh_token]
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("subscribed")
-
         let dataDict: [String: String] = ["token": fcmToken ?? ""]
         NotificationCenter.default.post(
             name: Notification.Name("FCMToken"),

@@ -61,7 +61,6 @@ struct ContentView: View {
         .tint(.gray)
         .onAppear(perform: {
             UITabBar.appearance().backgroundColor = .systemGray4.withAlphaComponent(0.4)
-            appEngine.getUserDocument{}
         })
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
@@ -73,7 +72,6 @@ struct ContentView: View {
             }
         }
         .onChange(of: appEngine.prompt.submitted) { _, isSubmitted in
-            print("Submitted state changed: \(isSubmitted)")
             if isSubmitted {
                 selectedIndex = 1 // VoteView
             } else {
