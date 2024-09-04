@@ -43,6 +43,7 @@ struct DeveloperView: View {
                                     
                                 NavigationLink(destination: DeveloperPromptView(date: fsPrompt.date).environmentObject(devService)) {
                                     Text(fsPrompt.prompt)
+                                        .foregroundStyle(.primary)
                                 }
                             }
                         } else { // users
@@ -54,6 +55,7 @@ struct DeveloperView: View {
                                     VStack {
                                         HStack(spacing: 5) {
                                             Text(user.nickname)
+                                                .foregroundStyle(.primary)
                                             Spacer()
                                             let medals: String = user.getMedals()
                                             if (!medals.isEmpty) {
@@ -113,6 +115,7 @@ struct DeveloperPromptView: View {
             if let answers = devService.prompts[date]?.answers {
                 List(answers, id: \.self) { answer in
                     Text(answer)
+                        .foregroundStyle(.primary)
                 }
             } else {
                 Text("No answers generated")

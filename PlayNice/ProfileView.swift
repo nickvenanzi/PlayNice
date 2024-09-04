@@ -94,6 +94,12 @@ struct ProfileView: View {
                     ProfileAnswerView(answer)
                 }
             }
+            .refreshable {
+                /*
+                 TO-DO
+                 */
+//                AppEngine.get
+            }
         }
     }
 }

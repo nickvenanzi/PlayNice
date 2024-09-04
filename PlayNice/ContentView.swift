@@ -58,7 +58,7 @@ struct ContentView: View {
                 }
                 .tag(4)
         }
-        .tint(.gray)
+        .tint(.primary)
         .onAppear(perform: {
             UITabBar.appearance().backgroundColor = .systemGray4.withAlphaComponent(0.4)
         })

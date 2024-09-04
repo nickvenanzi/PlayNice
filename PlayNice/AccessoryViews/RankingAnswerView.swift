@@ -10,7 +10,7 @@ struct RankingAnswerView: View {
     
     var body: some View {
         
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 RankView(answer.globalRank ?? -1)
                     .frame(alignment: .leading)
