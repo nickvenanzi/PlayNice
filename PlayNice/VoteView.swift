@@ -24,18 +24,9 @@ struct VoteView: View {
                     isSelected: appEngine.selectedAnswer == index
                 )
                 .onTapGesture {
-                    // locally change %'s
-                    for i in 0..<appEngine.currentAnswers.count {
-                        var wins = appEngine.currentAnswers[i].winPercentage * Float(appEngine.currentAnswers[i].votes)
-                        appEngine.currentAnswers[i].votes += 1
-                        if i == index {
-                            wins += 1.0
-                        }
-                        appEngine.currentAnswers[i].winPercentage = wins / Float(appEngine.currentAnswers[i].votes)
-                    }
+                    appEngine.castVotes(winningIndex: index)
                     withAnimation(.easeInOut) {
                         appEngine.selectedAnswer = index
-                        appEngine.castVotes()
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         appEngine.getAnswerSet()
@@ -47,7 +38,9 @@ struct VoteView: View {
         }
         .padding()
         .refreshable {
-            appEngine.getAnswerSet()
+            if appEngine.areCurrentAnswersStale() {
+                appEngine.getAnswerSet()
+            }
         }
     }
 }

@@ -2,10 +2,7 @@ import SwiftUI
 
 struct PromptView: View {
     @State private var userAnswer: String = ""
-    @State private var textViewHeight: CGFloat = 40  // Initial height
     
-    private var textViewWidth: CGFloat = UIScreen.main.bounds.width - 32
-
     @EnvironmentObject var appEngine: AppEngine
 
     var body: some View {
@@ -19,29 +16,29 @@ struct PromptView: View {
                 Text(appEngine.user.answers[appEngine.today]?.answer ?? userAnswer)
                     .font(.title3)
             } else {
-                TextEditor(text: $userAnswer)
-                    .padding(4)
-                    .frame(height: textViewHeight) // Dynamic height
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(8)
-                    .autocorrectionDisabled(true)
-                    .onChange(of: userAnswer) {
-                        recalculateHeight()
-                    }
-                
-                Button(action: {
-                    self.dismissKeyboard()
-                    // Handle answer submission
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        appEngine.submitAnswer(userAnswer)
-                    }
-                }) {
-                    Text("Submit")
-                        .frame(maxWidth: .infinity)  // Same width as the TextEditor
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .foregroundColor(.white)
+                HStack(alignment: .center, spacing: 10) {
+                    TextField("Enter a funny response", text: $userAnswer,  axis: .vertical)
+                        .lineLimit(1...10)
+                        .padding(4)
                         .cornerRadius(8)
+                        .autocorrectionDisabled(true)
+                        .textFieldStyle(.roundedBorder)
+                    if !userAnswer.isEmpty {
+                        Button {
+                            self.dismissKeyboard()
+                            // Handle answer submission
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                appEngine.submitAnswer(userAnswer)
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.blue)
+                                .font(.body.weight(.semibold))
+                        }
+                    }
                 }
             }
             
@@ -52,17 +49,5 @@ struct PromptView: View {
         .onTapGesture {
             self.dismissKeyboard()
         }
-    }
-    
-    private func recalculateHeight() {
-        let size = CGSize(width: textViewWidth, height: .infinity)
-        let attributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 17)]
-        let boundingRect = NSString(string: userAnswer).boundingRect(
-            with: size,
-            options: .usesLineFragmentOrigin,
-            attributes: attributes,
-            context: nil
-        )
-        textViewHeight = max(40, boundingRect.height + 24) // Update the height with padding
     }
 }

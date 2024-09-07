@@ -98,7 +98,6 @@ struct ProfileView: View {
                 /*
                  TO-DO
                  */
-//                AppEngine.get
             }
         }
     }

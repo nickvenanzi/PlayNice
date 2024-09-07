@@ -267,11 +267,21 @@ class AppEngine: ObservableObject {
     /*
      Public facing method, tallies votes back into database.
      */
-    func castVotes() {
-        let winner = currentAnswers[selectedAnswer ?? 0]
-        currentAnswers.forEach { answer in
-            votedOn.insert(answer.authorDocID)
+    func castVotes(winningIndex: Int) {
+        let winner = currentAnswers[winningIndex]
+        
+        for i in 0..<currentAnswers.count {
+            votedOn.insert(currentAnswers[i].authorDocID)
+            
+            // update answers locally
+            var wins = currentAnswers[i].winPercentage * Float(currentAnswers[i].votes)
+            currentAnswers[i].votes += 1
+            if i == winningIndex {
+                wins += 1.0
+            }
+            currentAnswers[i].winPercentage = wins / Float(currentAnswers[i].votes)
         }
+
         let date = AnswerDate().toString()
         let voteKey = "answers."+date+".votes"
         let winPercentKey = "answers."+date+".winPercentage"
@@ -329,6 +339,21 @@ class AppEngine: ObservableObject {
                 currentAnswers.append(answer)
             }
         }
+    }
+    
+    func areCurrentAnswersStale() -> Bool {
+        
+        // need more answers
+        if currentAnswers.count == 0 {
+            return true
+        }
+        
+        // already voted on current answers
+        if votedOn.contains(currentAnswers[0].authorDocID) {
+            return true
+        }
+
+        return false
     }
 
     /*

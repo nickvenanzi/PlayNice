@@ -19,9 +19,6 @@ struct RankingView: View {
             List(rankings) { answer in
                 RankingAnswerView(answer)
             }
-            .refreshable {
-                appEngine.updateRankingsAndFollowing()
-            }
         }
     }
 }
