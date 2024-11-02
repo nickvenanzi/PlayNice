@@ -16,13 +16,11 @@ struct RankingAnswerView: View {
                     .frame(alignment: .leading)
                 VStack(alignment: .leading) {
                     Text(answer.answer)
-                        .font(.body)
+                        .roundedTitleFont() // Applies the custom font modifier
                     Text(answer.author)
-                        .font(.body)
-                        .foregroundColor(.gray)
+                        .roundedTitleFont() // Applies the custom font modifier
                 }
             }
-            
             AnswerPercentageBar(answer)
         }
     }

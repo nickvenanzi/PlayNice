@@ -25,7 +25,7 @@ struct RankView: View {
             }
             return AnyView(HStack(spacing: 0) {
                 Text("\(rank)")
-                    .font(.headline)
+                    .roundedTitleFont() // Applies the custom font modifier
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
                 Text(trail)
@@ -36,7 +36,7 @@ struct RankView: View {
             })
         }
     }
-    
+        
     private func rankEmoji(for rank: Int) -> String {
         switch rank {
         case 1:
@@ -50,3 +50,4 @@ struct RankView: View {
         }
     }
 }
+

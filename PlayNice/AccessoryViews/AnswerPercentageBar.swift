@@ -31,11 +31,13 @@ struct AnswerPercentageBar: View {
         HStack {
             if includeVotes {
                 Text("\(answer.votes) \(postfix)")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                    .font(.system(.title2, design: .rounded))
+                    .fontWeight(.bold)
+                    .foregroundColor(.white.opacity(0.7))
+                    .minimumScaleFactor(0.5)
+                    .shadow(color: .black.opacity(0.3), radius: 2, x: 1, y: 2)
                     .frame(width: 70)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.5)
             }
             
             GeometryReader { geometry in
@@ -56,7 +58,7 @@ struct AnswerPercentageBar: View {
                 }
             })
             Text("\(Int(answer.winPercentage * 100))%")
-                .font(.caption)
+                .subTitleFont()
                 .foregroundColor(.gray)
         }
     }

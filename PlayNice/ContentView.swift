@@ -25,35 +25,35 @@ struct ContentView: View {
         TabView(selection: $selectedIndex) {
             PromptView()
                 .tabItem {
-                    Text("Prompt")
-                    Image(systemName: "person.text.rectangle")
+                    //Text("Prompt")
+                    Image(systemName: "paperplane")
                 }
                 .tag(0)
             
             VoteView()
                 .tabItem {
-                    Text("Vote")
+                   // Text("Vote")
                     Image(systemName: "figure.gymnastics")
                 }
                 .tag(1)
             
             RankingView()
                 .tabItem {
-                    Text("Ranking")
+                    //Text("Ranking")
                     Image(systemName: "list.number")
                 }
                 .tag(2)
             
             ProfileView()
                 .tabItem {
-                    Text("Profile")
+                    //Text("Profile")
                     Image(systemName: "person.text.rectangle")
                 }
                 .tag(3)
 
             DeveloperView()
                 .tabItem {
-                    Text("Developer")
+                    //Text("Developer")
                     Image(systemName: "hammer")
                 }
                 .tag(4)
@@ -84,5 +84,33 @@ struct ContentView: View {
 extension View {
     func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)  // Dismiss the keyboard
+    }
+    func roundedTitleFont() -> some View {
+        self.modifier(RoundedTitleFontModifier())
+    }
+    func subTitleFont() -> some View {
+        self.modifier(SubTitleFontModifier())
+    }
+}
+
+struct RoundedTitleFontModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.system(.title, design: .rounded))
+            .fontWeight(.heavy)
+            .foregroundColor(.white)
+            .minimumScaleFactor(0.5)
+            .shadow(color: .black.opacity(0.3), radius: 2, x: 1, y: 2)
+    }
+}
+
+struct SubTitleFontModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.system(.title2, design: .rounded))
+            .fontWeight(.heavy)
+            .foregroundColor(.white)
+            .minimumScaleFactor(0.5)
+            .shadow(color: .black.opacity(0.3), radius: 2, x: 1, y: 2)
     }
 }

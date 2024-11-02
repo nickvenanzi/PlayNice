@@ -26,7 +26,7 @@ struct ProfileAnswerView: View {
             }
             
             Text(answer.answer)
-                .font(.body)
+                .subTitleFont()
                 .padding(.top, 10)
             
             AnswerPercentageBar(answer)
