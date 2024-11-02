@@ -54,9 +54,9 @@ struct PromptView: View {
                     Spacer()
 
                 }
+                Spacer()
             }
             //.padding(.top, 100)
-            .padding(.bottom, 30)
             .onTapGesture {
                 self.dismissKeyboard()
             }
